@@ -1,0 +1,137 @@
+.page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  background: #fff;
+}
+
+.compact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 120px;
+  padding: 24px 16px;
+  background: transparent;
+}
+
+.canvas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+}
+
+.large {
+  min-height: 0;
+  padding: 0;
+
+  .loader {
+    width: 68px;
+  }
+
+  .message {
+    font-size: 32px;
+    line-height: 48px;
+  }
+
+  .dot {
+    font-size: 32px;
+    line-height: 48px;
+  }
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.loader {
+  display: block;
+  flex: 0 0 auto;
+  width: 34px;
+  height: auto;
+  margin: 0;
+}
+
+.message {
+  margin: 0;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  opacity: 1;
+  text-align: center;
+  transition: opacity 150ms ease;
+  font-family: "Poppins", var(--font-family);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: #1f1f1f;
+  white-space: nowrap;
+}
+
+.messageText {
+  display: inline;
+}
+
+.dots {
+  display: none;
+  align-items: baseline;
+  margin-left: 1px;
+
+  &:global(.isVisible) {
+    display: inline-flex;
+  }
+
+  &:global(.isThinking) .dot {
+    color: #000;
+    opacity: 0.4;
+    transform: translateY(0);
+    animation: dotThink 1.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+
+  &:global(.isThinking) .dot:nth-child(1) {
+    animation-delay: 0ms;
+  }
+
+  &:global(.isThinking) .dot:nth-child(2) {
+    animation-delay: 500ms;
+  }
+
+  &:global(.isThinking) .dot:nth-child(3) {
+    animation-delay: 1000ms;
+  }
+}
+
+.dot {
+  display: inline-block;
+  color: #000;
+  opacity: 0;
+}
+
+@keyframes dotThink {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translateY(0);
+  }
+
+  18% {
+    opacity: 1;
+    transform: translateY(-0.75px);
+  }
+
+  36% {
+    opacity: 0.4;
+    transform: translateY(0);
+  }
+}

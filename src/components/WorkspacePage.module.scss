@@ -1,0 +1,90 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+  width: 100%;
+}
+
+.introBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-24);
+  flex: 0 0 auto;
+  width: min(1080px, 100%);
+  margin: var(--space-32) auto 0;
+  padding: var(--space-32) var(--space-40);
+  border-radius: var(--border-radius-big);
+  background:
+    radial-gradient(
+      90% 120% at 0% 50%,
+      rgb(255 200 220 / 35%) 0%,
+      transparent 58%
+    ),
+    radial-gradient(
+      70% 100% at 78% 28%,
+      rgb(180 220 255 / 35%) 0%,
+      transparent 55%
+    ),
+    linear-gradient(135deg, #fff5f8 0%, #f3f8ff 45%, #f8fafc 100%);
+}
+
+.introCopy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  max-width: 36rem;
+}
+
+.introTitle {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.introDescription {
+  max-width: 34rem;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.introLogoWrap {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 6%);
+}
+
+.workspaceContent {
+  display: flex;
+  flex: 1 1 0%;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+:global(html.glaze),
+:global(html.warmth) {
+  .introBanner {
+    border-radius: var(--space-16);
+  }
+}
+
+@media (max-width: 900px) {
+  .introBanner {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-inline: var(--space-24);
+    padding: var(--space-24);
+  }
+
+  .introLogoWrap {
+    align-self: flex-end;
+  }
+}

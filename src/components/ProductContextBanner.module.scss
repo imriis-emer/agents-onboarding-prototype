@@ -1,0 +1,346 @@
+.banner {
+  --banner-accent-start: #35d49b;
+  --banner-accent-mid: #ff6fd8;
+  --banner-accent-end: #6a5cff;
+  --banner-surface-start: color-mix(
+    in srgb,
+    var(--banner-accent-start) 18%,
+    var(--primary-background-color)
+  );
+  --banner-surface-mid: color-mix(
+    in srgb,
+    var(--banner-accent-mid) 10%,
+    var(--primary-background-color)
+  );
+  --banner-surface-end: color-mix(
+    in srgb,
+    var(--banner-accent-start) 16%,
+    var(--primary-background-color)
+  );
+
+  position: relative;
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) auto;
+  grid-template-rows: 1fr auto 1fr;
+  align-items: center;
+  column-gap: var(--space-20);
+  row-gap: 0;
+  width: 100%;
+  margin-inline: 0;
+  margin-top: 0;
+  flex: 0 0 128px;
+  align-self: stretch;
+  block-size: 128px;
+  height: 128px;
+  min-height: 128px;
+  padding: 20px var(--space-24) 20px 0;
+  overflow: hidden;
+  border: var(--border-width) solid
+    color-mix(in srgb, var(--ui-border-color) 60%, transparent);
+  border-radius: var(--border-radius-big);
+  background:
+    linear-gradient(
+      90deg,
+      var(--banner-surface-start) 0%,
+      var(--banner-surface-mid) 48%,
+      var(--banner-surface-end) 100%
+    ),
+    var(--primary-background-color);
+  animation: bannerReveal 420ms ease-out both;
+}
+
+.sidekick {
+  --banner-accent-start: #31d58b;
+  --banner-accent-mid: #ff71d2;
+  --banner-accent-end: #6a5cff;
+}
+
+.agents {
+  --banner-accent-start: #00c875;
+  --banner-accent-mid: #6a5cff;
+  --banner-accent-end: #2bd4c8;
+}
+
+.vibe {
+  --banner-accent-start: #ffcb00;
+  --banner-accent-mid: #ff7a00;
+  --banner-accent-end: #a25cff;
+}
+
+.workflows {
+  --banner-accent-start: #0074fd;
+  --banner-accent-mid: #9450fd;
+  --banner-accent-end: #1ad5ff;
+}
+
+.notetaker {
+  --banner-accent-start: #0085ff;
+  --banner-accent-mid: #7b68ee;
+  --banner-accent-end: #00c875;
+}
+
+.artwork {
+  position: relative;
+  grid-row: 1 / -1;
+  grid-column: 1;
+  width: 150px;
+  height: 100%;
+  align-self: stretch;
+}
+
+.artworkLogo {
+  position: absolute;
+  top: 50%;
+  left: -66px;
+  width: 226px;
+  height: 226px;
+  object-fit: contain;
+  filter: saturate(1.1);
+  transform: translateY(-50%) rotate(-8deg);
+}
+
+.copy {
+  display: flex;
+  grid-row: 2;
+  grid-column: 2;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.375rem;
+  line-height: 1.2;
+  white-space: normal;
+}
+
+.description {
+  max-width: 710px;
+  line-height: 1.35;
+}
+
+.action {
+  grid-row: 2;
+  grid-column: 3;
+  align-self: end;
+  justify-self: end;
+  border-color: #323338;
+  background: #323338;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.action:hover,
+.action:focus,
+.action:focus-visible {
+  border-color: #c3c6d4;
+  background: #f6f7fb;
+  color: #323338;
+}
+
+.action:hover *,
+.action:focus *,
+.action:focus-visible * {
+  color: #323338;
+}
+
+.action * {
+  color: #fff;
+}
+
+.dismissButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: var(--secondary-text-color);
+}
+
+.tourOverlay {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  background: transparent;
+}
+
+.tourHighlight {
+  position: fixed;
+  z-index: 10001;
+  border-radius: var(--border-radius-medium);
+  box-shadow: 0 0 0 9999px rgba(50, 51, 56, 0.64);
+  pointer-events: none;
+  animation: tourStepFadeIn 180ms ease-out both;
+}
+
+.tourCard {
+  position: fixed;
+  z-index: 10002;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  width: 300px;
+  padding: var(--space-16);
+  border-radius: var(--border-radius-medium);
+  background: var(--primary-background-color);
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.18),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+  animation: tourStepFadeIn 180ms ease-out both;
+}
+
+.tourCard::before {
+  position: absolute;
+  width: 0;
+  height: 0;
+  content: "";
+}
+
+.tourCloseButton {
+  position: absolute;
+  top: var(--space-8);
+  right: var(--space-8);
+  color: var(--secondary-text-color);
+}
+
+.right::before {
+  top: 50%;
+  left: -10px;
+  border-top: 10px solid transparent;
+  border-right: 10px solid var(--primary-background-color);
+  border-bottom: 10px solid transparent;
+  transform: translateY(-50%);
+}
+
+.left::before {
+  top: 50%;
+  right: -10px;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 10px solid var(--primary-background-color);
+  transform: translateY(-50%);
+}
+
+.bottom::before {
+  top: -10px;
+  left: 50%;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid var(--primary-background-color);
+  border-left: 10px solid transparent;
+  transform: translateX(-50%);
+}
+
+.top::before {
+  bottom: -10px;
+  left: 50%;
+  border-top: 10px solid var(--primary-background-color);
+  border-right: 10px solid transparent;
+  border-left: 10px solid transparent;
+  transform: translateX(-50%);
+}
+
+.tourCopy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-inline-end: var(--space-24);
+  animation: tourCopyIn 180ms ease-out both;
+}
+
+.tourFooter {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.tourBackSlot {
+  justify-self: start;
+}
+
+.tourNextSlot {
+  justify-self: end;
+}
+
+.tourDots {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  justify-self: center;
+}
+
+.dot,
+.activeDot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ui-border-color);
+}
+
+.activeDot {
+  background: #323338;
+}
+
+@keyframes bannerReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tourCopyIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tourStepFadeIn {
+  from {
+    opacity: 0.82;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tourHighlight,
+  .tourCard,
+  .tourCopy {
+    animation: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .banner {
+    grid-template-columns: 112px minmax(0, 1fr) auto;
+    column-gap: var(--space-16);
+    padding-inline-end: var(--space-32);
+  }
+
+  .artwork {
+    width: 112px;
+  }
+
+  .artworkLogo {
+    left: -60px;
+    width: 196px;
+    height: 196px;
+  }
+
+  .tourCard {
+    width: min(300px, calc(100vw - var(--space-32)));
+  }
+}

@@ -1,0 +1,272 @@
+.page {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+  padding: 40px 32px 32px;
+  animation: selectionEnter 480ms ease both;
+}
+
+@keyframes selectionEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1280px;
+  gap: 32px;
+}
+
+.headingBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 580px;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-family: "Poppins", var(--title-font-family);
+  font-size: 27.2px;
+  font-weight: 500;
+  line-height: 34px;
+  letter-spacing: -0.425px;
+  color: var(--primary-text-color, #323338);
+}
+
+.subtitle {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22px;
+  color: #000;
+}
+
+.cardRow {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  overflow-x: auto;
+  padding: 20px 12px 28px;
+  scroll-snap-type: x mandatory;
+}
+
+.galleryPrompt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-family: var(--font-family);
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--secondary-text-color, #676879);
+}
+
+.galleryButton {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid
+    color-mix(in srgb, var(--secondary-text-color, #676879) 45%, transparent);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--secondary-text-color, #676879);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+
+  &:hover {
+    border-color: color-mix(
+      in srgb,
+      var(--secondary-text-color, #676879) 65%,
+      transparent
+    );
+    background: rgb(255 255 255 / 18%);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color, #0073ea);
+    outline-offset: 2px;
+  }
+}
+
+.agentCard {
+  position: relative;
+  flex: 0 0 330px;
+  width: 330px;
+  height: 440px;
+  padding: 0;
+  border: none;
+  border-radius: 24px;
+  background: transparent;
+  cursor: pointer;
+  scroll-snap-align: center;
+  transform: translateY(0) scale(1);
+  filter: none;
+  transition:
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 200ms ease,
+    filter 200ms ease;
+
+  &:focus-visible .cardMedia {
+    box-shadow:
+      0 16px 32px rgb(20 18 60 / 16%),
+      0 0 0 3px color-mix(in srgb, var(--primary-color, #0073ea) 50%, white);
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-8px) scale(1.03);
+  }
+
+  &:hover:not(:disabled) .cardMedia {
+    box-shadow:
+      0 22px 40px rgb(20 18 60 / 20%),
+      0 0 0 3px #fff;
+  }
+}
+
+.cardMedia {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 24px;
+  box-shadow: 0 10px 24px rgb(20 18 60 / 10%);
+  transition: box-shadow 200ms ease;
+}
+
+.agentCardSelected {
+  transform: translateY(-10px) scale(1.04);
+  z-index: 2;
+
+  .cardMedia {
+    box-shadow:
+      0 26px 48px rgb(20 18 60 / 24%),
+      0 0 0 4px #fff;
+  }
+}
+
+.agentCardDimmed {
+  opacity: 0.45;
+  filter: saturate(0.8);
+  transform: scale(0.98);
+}
+
+.cardRowHasSelection .agentCard:not(.agentCardSelected):hover {
+  transform: scale(0.98);
+}
+
+.cardRowHasSelection .agentCard:not(.agentCardSelected):hover .cardMedia {
+  box-shadow: 0 10px 24px rgb(20 18 60 / 10%);
+}
+
+.agentImageComposed {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.agentImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  pointer-events: none;
+  user-select: none;
+}
+
+.agentPanel {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 3px;
+  height: 156px;
+  padding: 16px 20px;
+  border: 1px solid #fff;
+  border-radius: 20px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.agentName {
+  align-self: flex-start;
+  margin-bottom: 4px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  background: #f6f7fb;
+  font-family: var(--font-family);
+  font-size: 14px;
+  line-height: 20px;
+  color: #323338;
+}
+
+.agentTitle {
+  font-family: "Poppins", var(--title-font-family);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.23;
+  letter-spacing: -0.2px;
+  color: #000;
+  text-align: left;
+}
+
+.agentDescription {
+  max-width: 250px;
+  font-family: var(--font-family);
+  font-size: 14px;
+  line-height: 19px;
+  color: #676879;
+  text-align: left;
+}
+
+@media (max-width: 1100px) {
+  .cardRow {
+    justify-content: flex-start;
+    padding-inline: 8px;
+  }
+
+  .galleryPrompt {
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  .galleryButton {
+    min-height: 32px;
+  }
+}

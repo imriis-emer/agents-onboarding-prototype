@@ -1,0 +1,25 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 819.341 977.196" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="BG">
+<g clip-path="url(#clip0_0_245)">
+<g id="Ellipse 6" filter="url(#filter0_f_0_245)">
+<ellipse cx="409.67" cy="488.598" rx="739.474" ry="345.777" fill="url(#paint0_linear_0_245)" fill-opacity="0.1"/>
+</g>
+<g id="Frame 2147241194">
+</g>
+</g>
+</g>
+<defs>
+<filter id="filter0_f_0_245" x="-515.847" y="-43.222" width="1851.03" height="1063.64" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="93.0215" result="effect1_foregroundBlur_0_245"/>
+</filter>
+<linearGradient id="paint0_linear_0_245" x1="-60.1355" y1="488.598" x2="870.08" y2="488.598" gradientUnits="userSpaceOnUse">
+<stop stop-color="#04F7FB"/>
+<stop offset="1" stop-color="#9450FD"/>
+</linearGradient>
+<clipPath id="clip0_0_245">
+<path d="M0 15.0338C0 6.73085 6.73085 0 15.0338 0H804.307C812.61 0 819.341 6.73085 819.341 15.0338V962.162C819.341 970.465 812.61 977.196 804.307 977.196H15.0337C6.73081 977.196 0 970.465 0 962.162V15.0338Z" fill="white"/>
+</clipPath>
+</defs>
+</svg>

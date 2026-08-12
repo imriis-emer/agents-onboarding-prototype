@@ -1,0 +1,241 @@
+.page {
+  position: relative;
+  min-height: 100vh;
+  background: #fff;
+  color: #1c1c26;
+  overflow-x: hidden;
+  padding-bottom: 40px;
+  animation: pageEnter 420ms ease both;
+}
+
+.gridBg {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 640px;
+  background-image: linear-gradient(
+      to right,
+      rgb(0 0 0 / 5%) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgb(0 0 0 / 5%) 1px, transparent 1px);
+  background-size: 132px 132px;
+  -webkit-mask-image: radial-gradient(
+    58% 58% at 50% 32%,
+    #000 0%,
+    transparent 72%
+  );
+  mask-image: radial-gradient(58% 58% at 50% 32%, #000 0%, transparent 72%);
+  pointer-events: none;
+}
+
+.header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-24);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 18px 40px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logoText {
+  font-family: "Figtree", var(--font-family);
+  font-size: 19px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  color: #1c1c26;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  color: #323338;
+  cursor: default;
+}
+
+.navCaret {
+  font-size: 12px;
+  color: #676879;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.textLink {
+  font-family: var(--font-family);
+  font-size: 15px;
+  color: #323338;
+  cursor: default;
+}
+
+.outlineButton,
+.accountButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-family: var(--font-family);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.outlineButton {
+  border: 1px solid #6161ff;
+  background: #fff;
+  color: #6161ff;
+
+  &:hover {
+    background: #f2f2ff;
+  }
+}
+
+.accountButton {
+  border: none;
+  background: #6161ff;
+  color: #fff;
+  font-weight: var(--font-weight-medium);
+
+  &:hover {
+    background: #4d4dff;
+  }
+}
+
+.hero {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 40px 40px 0;
+}
+
+.lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lockupText {
+  font-family: "Figtree", var(--font-family);
+  font-size: 22px;
+  line-height: 1;
+  color: #1c1c26;
+
+  strong {
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+.heroTitle {
+  margin: 22px 0 0;
+  font-family: "Poppins", var(--title-font-family);
+  font-size: clamp(48px, 6.4vw, 76px);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: #1c1c26;
+}
+
+.heroSubtitle {
+  max-width: 560px;
+  margin: 20px 0 0;
+  font-family: var(--font-family);
+  font-size: 18px;
+  line-height: 27px;
+  color: #505258;
+}
+
+.getStarted {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 28px;
+  min-height: 52px;
+  padding: 0 30px;
+  border: none;
+  border-radius: 999px;
+  background: #1c1c26;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 16px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color 160ms ease, transform 160ms ease;
+
+  &:hover {
+    background: #000;
+    transform: translateY(-1px);
+  }
+}
+
+.carousel {
+  position: relative;
+  z-index: 1;
+  margin-top: 24px;
+  background: #fff;
+}
+
+.carouselImage {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .nav,
+  .textLink,
+  .outlineButton {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .header {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}

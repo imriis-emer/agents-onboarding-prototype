@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+
+# Build output
+build/
+dist/
+
+# Vite
+*.local
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+
+# Playwright
+.playwright-mcp/
+
+# TypeScript
+*.tsbuildinfo
+
+# Misc
+*.log
+.superpowers/
+/docs/superpowers/
+
+# Figma Make design references (reference-only, non-building; kept locally, not in repo)
+/docs/design-sources/
+
+# Vite optimize-deps cache
+.vite/
+**/.vite/

@@ -1,0 +1,287 @@
+@use "./productHeroGlaze" as heroGlaze;
+@use "./composerGlow" as composerGlow;
+
+.root {
+  --product-banner-bleed: var(--space-40);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32);
+  padding: var(--space-32) var(--space-40) var(--space-48);
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.discoverySection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  width: 100%;
+}
+
+.discoveryTopRow {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.discoveryTopSpacer {
+  flex: 1 1 auto;
+}
+
+.headerActions {
+  flex: 0 0 auto;
+}
+
+.heroBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-24);
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+  text-align: center;
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.25;
+}
+
+.gradientWord {
+  background: linear-gradient(90deg, #00b2ff 0%, #6c4bff 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.heroSubtitle {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.composerBorder {
+  width: 100%;
+  padding: 1.5px;
+  border-radius: 18px;
+  background: linear-gradient(
+    120deg,
+    #2bd4c8 0%,
+    #6c4bff 55%,
+    #b83cff 100%
+  );
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 4%),
+    0 10px 28px rgb(76 75 255 / 12%);
+}
+
+.composerWrap {
+  border-radius: 16px;
+  background: var(--primary-background-color);
+  overflow: hidden;
+}
+
+.composerInput {
+  width: 100%;
+  min-height: 120px;
+  padding: var(--space-20) var(--space-20) var(--space-8);
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--primary-text-color);
+
+  &::placeholder {
+    color: var(--secondary-text-color);
+  }
+}
+
+.composerFooter {
+  padding: var(--space-8) var(--space-12) var(--space-12);
+}
+
+.contextTourTarget {
+  display: inline-flex;
+  border-radius: var(--border-radius-small);
+}
+
+.composerSendButton {
+  border-radius: 50%;
+  background: var(--disabled-background-color, #ecedf5);
+  color: var(--disabled-text-color, #676879);
+}
+
+.categoryFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  width: 100%;
+}
+
+.categoryFilter {
+  min-height: var(--space-32);
+  padding: 0 var(--space-16);
+  border: var(--border-width) solid var(--ui-border-color);
+  border-radius: 999px;
+  background: var(--primary-background-color);
+  color: var(--primary-text-color);
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--primary-color) 30%, var(--ui-border-color));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+}
+
+.categoryFilterActive {
+  border-color: #323338;
+  background: #323338;
+  color: #fff;
+
+  &:hover {
+    border-color: #323338;
+  }
+}
+
+.marketplaceSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  width: 100%;
+}
+
+.marketplaceTitle {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.marketplaceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-16);
+}
+
+.marketplaceCard {
+  min-width: 0;
+}
+
+.marketplaceCardButton {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  border: var(--border-width) solid var(--ui-border-color);
+  border-radius: var(--border-radius-medium);
+  background: var(--primary-background-color);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    box-shadow 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    border-color: color-mix(in srgb, #6c4bff 24%, var(--ui-border-color));
+    box-shadow: 0 8px 24px rgb(76 75 255 / 10%);
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+}
+
+.marketplaceCardMedia {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.marketplaceCardImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.marketplaceCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-12) var(--space-16) var(--space-16);
+}
+
+:global(html.glaze),
+:global(html.warmth) {
+  @include heroGlaze.product-hero-glaze;
+
+  .heroTitle {
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  .heroSubtitle {
+    font-size: 16px;
+  }
+
+  .root {
+    display: flex;
+    position: static;
+  }
+
+  .headerActions {
+    position: static;
+    width: auto;
+  }
+}
+
+@include composerGlow.composer-glow(
+  linear-gradient(120deg, #2bd4c8 0%, #6c4bff 55%, #b83cff 100%)
+);
+
+@media (max-width: 900px) {
+  .root {
+    padding-inline: var(--space-24);
+  }
+
+  .discoveryTopRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-12);
+  }
+
+  .discoveryTopSpacer {
+    display: none;
+  }
+
+  .headerActions {
+    justify-content: flex-end;
+  }
+}

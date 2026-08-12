@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loader GIF export</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: #fff;
+      }
+
+      .page {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: auto;
+        height: auto;
+        background: #fff;
+      }
+
+      .row {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+      }
+
+      .row.isMeasuring {
+        width: max-content;
+      }
+
+      .message.isMeasuring {
+        width: auto;
+      }
+
+      .loader {
+        display: block;
+        flex: 0 0 auto;
+        width: 34px;
+        height: auto;
+        margin: 0;
+      }
+
+      .page.large .loader {
+        width: 68px;
+      }
+
+      .message {
+        margin: 0;
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-width: 0;
+        opacity: 1;
+        text-align: center;
+        transition: opacity 150ms ease;
+        font-family: "Poppins", sans-serif;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 24px;
+        color: #1f1f1f;
+        white-space: nowrap;
+      }
+
+      .page.large .message {
+        font-size: 32px;
+        line-height: 48px;
+      }
+
+      .page.large .dot {
+        font-size: 32px;
+        line-height: 48px;
+      }
+
+      .dots {
+        display: none;
+        align-items: baseline;
+        margin-left: 1px;
+      }
+
+      .dots.isVisible {
+        display: inline-flex;
+      }
+
+      .dots.isThinking .dot {
+        color: #000;
+        opacity: 0.4;
+        transform: translateY(0);
+        animation: dotThink 1.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+      }
+
+      .dots.isThinking .dot:nth-child(1) {
+        animation-delay: 0ms;
+      }
+
+      .dots.isThinking .dot:nth-child(2) {
+        animation-delay: 500ms;
+      }
+
+      .dots.isThinking .dot:nth-child(3) {
+        animation-delay: 1000ms;
+      }
+
+      .dot {
+        display: inline-block;
+        color: #000;
+        opacity: 0;
+      }
+
+      @keyframes dotThink {
+        0%,
+        100% {
+          opacity: 0.4;
+          transform: translateY(0);
+        }
+
+        18% {
+          opacity: 1;
+          transform: translateY(-0.75px);
+        }
+
+        36% {
+          opacity: 0.4;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page" id="capture-root" data-size="default">
+      <div class="row">
+        <img
+          src="./monday-loader.gif"
+          alt=""
+          class="loader"
+          aria-hidden="true"
+        />
+        <p class="message" id="message">
+          <span id="message-text"></span>
+          <span class="dots" id="dots">
+            <span class="dot" data-dot>.</span>
+            <span class="dot" data-dot>.</span>
+            <span class="dot" data-dot>.</span>
+          </span>
+        </p>
+      </div>
+    </div>
+    <script>
+      const MESSAGE_SETS = {
+        default: [
+          "Your agent is waking up…",
+          "Getting briefed on the goal…",
+          "Picking up the right tools…",
+          "Running a quick warm-up…",
+          "Your agent is almost ready…",
+          "Your agent is nearly here…",
+        ],
+        general: [
+          "Your agent is waking up…",
+          "Getting briefed on the goal…",
+          "Picking up the right tools…",
+          "Running a quick warm-up…",
+          "Your agent is almost ready…",
+          "Your agent is nearly here…",
+        ],
+        lia: [
+          "Your Marketing Agent is waking up…",
+          "Getting briefed on the goal…",
+          "Loading marketing skills…",
+          "Sharpening marketing instincts…",
+          "Your agent is almost ready…",
+          "Your agent is nearly here…",
+        ],
+        jade: [
+          "Your HR Agent is waking up…",
+          "Getting briefed on the goal…",
+          "Loading hiring skills…",
+          "Sharpening sourcing instincts…",
+          "Your agent is almost ready…",
+          "Your agent is nearly here…",
+        ],
+        account: ["Creating your account…"],
+      };
+
+      const params = new URLSearchParams(location.search);
+      const variant = params.get("variant") || "default";
+      const size = params.get("size") || "default";
+      const mode = params.get("mode") || "export";
+      const canvasWidthParam = params.get("canvasWidth");
+      const canvasHeightParam = params.get("canvasHeight");
+      const MESSAGES = MESSAGE_SETS[variant] ?? MESSAGE_SETS.default;
+
+      const captureRoot = document.getElementById("capture-root");
+      if (size === "large") {
+        captureRoot.classList.add("large");
+        captureRoot.dataset.size = "large";
+      }
+
+      const CHAR_DELAY_MS = 44;
+      const HOLD_MS = 2000;
+      const FADE_MS = 150;
+      const CYCLES = Number(params.get("cycles") || 1);
+
+      function messageWithoutDots(message) {
+        return message.replace(/(?:\.{3}|…)$/, "");
+      }
+
+      function sleep(ms) {
+        return new Promise((resolve) => window.setTimeout(resolve, ms));
+      }
+
+      function resetDots(dotsEl) {
+        dotsEl.classList.remove("isVisible", "isThinking");
+      }
+
+      async function typeText(textEl, text) {
+        textEl.textContent = "";
+        for (let index = 0; index < text.length; index += 1) {
+          await sleep(CHAR_DELAY_MS);
+          textEl.textContent = text.slice(0, index + 1);
+        }
+      }
+
+      async function showDots(dotsEl) {
+        dotsEl.classList.add("isVisible", "isThinking");
+      }
+
+      async function transitionToNextMessage(messageEl, textEl, dotsEl) {
+        messageEl.style.opacity = "0";
+        await sleep(FADE_MS);
+        textEl.textContent = "";
+        resetDots(dotsEl);
+        requestAnimationFrame(() => {
+          messageEl.style.opacity = "1";
+        });
+      }
+
+      async function waitForLoaderImage(loader) {
+        if (loader.complete && loader.naturalWidth > 0) return;
+        await new Promise((resolve) => {
+          loader.addEventListener("load", resolve, { once: true });
+          loader.addEventListener("error", resolve, { once: true });
+        });
+      }
+
+      async function measureNaturalWidth() {
+        const row = captureRoot.querySelector(".row");
+        const loader = captureRoot.querySelector(".loader");
+        const messageEl = document.getElementById("message");
+        const textEl = document.getElementById("message-text");
+        const dotsEl = document.getElementById("dots");
+
+        await waitForLoaderImage(loader);
+
+        row.classList.add("isMeasuring");
+        messageEl.classList.add("isMeasuring");
+        captureRoot.style.width = "auto";
+        captureRoot.style.height = "auto";
+
+        let maxWidth = Math.ceil(loader.getBoundingClientRect().width);
+
+        for (const message of MESSAGES) {
+          textEl.textContent = messageWithoutDots(message);
+          dotsEl.classList.add("isVisible", "isThinking");
+          maxWidth = Math.max(
+            maxWidth,
+            Math.ceil(row.getBoundingClientRect().width),
+          );
+          dotsEl.classList.remove("isVisible", "isThinking");
+        }
+
+        textEl.textContent = "";
+        resetDots(dotsEl);
+        row.classList.remove("isMeasuring");
+        messageEl.classList.remove("isMeasuring");
+
+        return maxWidth;
+      }
+
+      async function measureHeightAtCanvasWidth(canvasWidth) {
+        const row = captureRoot.querySelector(".row");
+        const messageEl = document.getElementById("message");
+        const textEl = document.getElementById("message-text");
+        const dotsEl = document.getElementById("dots");
+
+        await waitForLoaderImage(captureRoot.querySelector(".loader"));
+
+        textEl.textContent = messageWithoutDots(MESSAGES[0] ?? "");
+        dotsEl.classList.add("isVisible", "isThinking");
+        messageEl.style.opacity = "1";
+
+        captureRoot.style.width = `${canvasWidth}px`;
+        row.style.width = "100%";
+
+        const height = Math.ceil(row.getBoundingClientRect().height);
+
+        textEl.textContent = "";
+        resetDots(dotsEl);
+
+        return height;
+      }
+
+      async function prepareExportDimensions() {
+        const row = captureRoot.querySelector(".row");
+        const canvasWidth = Number(canvasWidthParam);
+        const canvasHeight = Number(canvasHeightParam);
+
+        if (!canvasWidth || !canvasHeight) {
+          throw new Error("canvasWidth and canvasHeight are required for export");
+        }
+
+        await waitForLoaderImage(captureRoot.querySelector(".loader"));
+
+        captureRoot.style.width = `${canvasWidth}px`;
+        row.style.width = "100%";
+        captureRoot.style.height = `${canvasHeight}px`;
+        captureRoot.style.display = "flex";
+        captureRoot.style.alignItems = "center";
+        captureRoot.style.justifyContent = "center";
+
+        window.__LOADER_EXPORT_DIMENSIONS__ = {
+          width: canvasWidth,
+          height: canvasHeight,
+        };
+        window.__LOADER_EXPORT_READY__ = true;
+      }
+
+      async function runAnimation() {
+        const messageEl = document.getElementById("message");
+        const textEl = document.getElementById("message-text");
+        const dotsEl = document.getElementById("dots");
+
+        let index = 0;
+        let isFirstMessage = true;
+        let completedCycles = 0;
+
+        while (true) {
+          if (!isFirstMessage) {
+            await transitionToNextMessage(messageEl, textEl, dotsEl);
+          } else {
+            messageEl.style.opacity = "1";
+            isFirstMessage = false;
+          }
+
+          await typeText(textEl, messageWithoutDots(MESSAGES[index] ?? ""));
+          await showDots(dotsEl);
+          await sleep(HOLD_MS);
+
+          const isLastMessage = index >= MESSAGES.length - 1;
+          if (isLastMessage) {
+            completedCycles += 1;
+            if (completedCycles >= CYCLES) {
+              window.__LOADER_EXPORT_DONE__ = true;
+              return;
+            }
+          }
+
+          index = (index + 1) % MESSAGES.length;
+        }
+      }
+
+      document.fonts.ready.then(async () => {
+        window.__LOADER_EXPORT_DONE__ = false;
+
+        if (mode === "measure-width") {
+          window.__LOADER_MEASURED_WIDTH__ = await measureNaturalWidth();
+          window.__LOADER_MEASURE_READY__ = true;
+          return;
+        }
+
+        if (mode === "measure-height") {
+          window.__LOADER_MEASURED_HEIGHT__ = await measureHeightAtCanvasWidth(
+            Number(canvasWidthParam),
+          );
+          window.__LOADER_MEASURE_READY__ = true;
+          return;
+        }
+
+        window.__LOADER_EXPORT_READY__ = false;
+        prepareExportDimensions();
+      });
+
+      window.__LOADER_START_ANIMATION__ = () => {
+        window.__LOADER_EXPORT_DONE__ = false;
+        runAnimation();
+      };
+    </script>
+  </body>
+</html>

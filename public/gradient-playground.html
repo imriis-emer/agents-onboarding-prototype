@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Conversation gradient playground</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --panel: #f6f7fb;
+        --border: #c3c6d4;
+        --text: #323338;
+        --muted: #676879;
+        --accent: #0073ea;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          Inter,
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        color: var(--text);
+        background: #e8ebf2;
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: minmax(320px, 380px) 1fr;
+        min-height: 100vh;
+      }
+
+      .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px;
+        background: #fff;
+        border-right: 1px solid var(--border);
+        overflow: auto;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .lede {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--panel);
+      }
+
+      .stack h2 {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .layer-row {
+        display: grid;
+        grid-template-columns: 18px 1fr auto;
+        gap: 8px;
+        align-items: center;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: #fff;
+        border: 1px solid transparent;
+      }
+
+      .layer-row.active {
+        border-color: color-mix(in srgb, var(--accent) 40%, white);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 15%, white);
+      }
+
+      .layer-row button.select {
+        all: unset;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .layer-row .meta {
+        font-size: 11px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      .fields {
+        display: grid;
+        gap: 10px;
+      }
+
+      label {
+        display: grid;
+        gap: 4px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      label span.value {
+        float: right;
+        color: var(--text);
+        font-variant-numeric: tabular-nums;
+      }
+
+      input[type="range"] {
+        width: 100%;
+      }
+
+      input[type="color"] {
+        width: 100%;
+        height: 34px;
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: #fff;
+      }
+
+      .color-row {
+        display: grid;
+        grid-template-columns: 1fr 72px;
+        gap: 8px;
+        align-items: end;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      button.action {
+        border: 1px solid var(--border);
+        background: #fff;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      button.action.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+
+      button.action:hover {
+        filter: brightness(0.97);
+      }
+
+      .preview-wrap {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+      }
+
+      .preview-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        background: #fff;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .preview-bar strong {
+        font-size: 13px;
+      }
+
+      .preview-bar span {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .stage {
+        flex: 1;
+        display: grid;
+        place-items: stretch;
+        padding: 24px;
+        min-height: 0;
+      }
+
+      .phone {
+        position: relative;
+        width: min(920px, 100%);
+        height: min(760px, calc(100vh - 96px));
+        margin: 0 auto;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        box-shadow: 0 18px 50px rgb(15 23 42 / 12%);
+        background: #fff;
+      }
+
+      .mainColumn {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .stageGradientTop,
+      .stageGradientBottom,
+      .wash,
+      .fade {
+        position: absolute;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .wash {
+        inset: 0;
+      }
+
+      .fade {
+        right: 0;
+        bottom: 0;
+        left: 0;
+      }
+
+      .chat {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        width: min(420px, calc(100% - 48px));
+        margin: 48px auto 0;
+        padding: 0 8px;
+      }
+
+      .bubble {
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: rgb(255 255 255 / 88%);
+        border: 1px solid rgb(195 198 212 / 45%);
+        box-shadow: 0 8px 24px rgb(15 23 42 / 4%);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .bubble.agent {
+        border-left: 3px solid #33d58e;
+      }
+
+      .bubble.user {
+        align-self: flex-end;
+        background: #eef5ff;
+      }
+
+      .css-out {
+        margin: 0;
+        padding: 12px;
+        border-radius: 10px;
+        background: #111827;
+        color: #e5e7eb;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 11px;
+        line-height: 1.45;
+        white-space: pre-wrap;
+        max-height: 280px;
+        overflow: auto;
+      }
+
+      .note {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+
+      @media (max-width: 960px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+
+        .controls {
+          border-right: 0;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .phone {
+          height: 620px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="controls">
+        <div>
+          <h1>Conversation gradient</h1>
+          <p class="lede">
+            This surface is <strong>4 stacked layers</strong>, not one gradient:
+            base wash → top conic blur → bottom conic blur → white fade.
+          </p>
+        </div>
+
+        <section class="stack">
+          <h2>Layers (top → bottom of stack)</h2>
+          <div id="layerList"></div>
+          <p class="note">
+            Toggle layers on/off to see what each contributes. Click a layer to
+            edit its controls.
+          </p>
+        </section>
+
+        <section class="stack">
+          <h2 id="editorTitle">Edit layer</h2>
+          <div class="fields" id="editor"></div>
+        </section>
+
+        <section class="stack">
+          <h2>Shared</h2>
+          <div class="fields">
+            <label>
+              Blur (top + bottom)
+              <input id="blur" type="range" min="0" max="320" step="2" />
+            </label>
+          </div>
+          <div class="actions">
+            <button class="action" id="resetBtn" type="button">Reset</button>
+            <button class="action primary" id="copyBtn" type="button">
+              Copy CSS
+            </button>
+          </div>
+        </section>
+
+        <section class="stack">
+          <h2>Exported CSS</h2>
+          <pre class="css-out" id="cssOut"></pre>
+        </section>
+      </aside>
+
+      <main class="preview-wrap">
+        <div class="preview-bar">
+          <strong>Live preview</strong>
+          <span id="summary"></span>
+        </div>
+        <div class="stage">
+          <div class="phone">
+            <div class="mainColumn" id="mainColumn">
+              <div class="wash" id="wash"></div>
+              <div class="stageGradientTop" id="gradTop"></div>
+              <div class="stageGradientBottom" id="gradBottom"></div>
+              <div class="fade" id="fade"></div>
+              <div class="chat">
+                <div class="bubble agent">
+                  Hi Ohad 👋 I'm Jade — your new recruiting teammate. I handle
+                  the sourcing legwork so you can focus on the candidates that
+                  matter.
+                </div>
+                <div class="bubble user">Show me how this works</div>
+                <div class="bubble agent">
+                  Great — I’ll start by setting up your recruiting board and
+                  walking you through the first few steps.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const DEFAULTS = {
+        blur: 202,
+        wash: {
+          enabled: true,
+          color: "#d8dfe4",
+          opacity: 10,
+        },
+        top: {
+          enabled: true,
+          colorA: "#1ad5ff",
+          colorB: "#c367f2",
+          colorC: "#33d58e",
+          width: 1292,
+          height: 110,
+          top: -73,
+          offsetX: 17.5,
+          from: 211.23,
+          atX: 57.6,
+          atY: 61.3,
+        },
+        bottom: {
+          enabled: true,
+          colorA: "#c367f2",
+          colorB: "#1ad5ff",
+          colorC: "#33d58e",
+          width: 1292,
+          height: 44,
+          bottom: 76,
+          offsetX: -40,
+          from: 211.23,
+          atX: 57.6,
+          atY: 61.3,
+          maskSolid: 35,
+        },
+        fade: {
+          enabled: true,
+          heightPx: 280,
+          heightPct: 42,
+          midOpacity: 55,
+          midStop: 42,
+        },
+      };
+
+      let state = structuredClone(DEFAULTS);
+      let selected = "fade";
+
+      const els = {
+        layerList: document.getElementById("layerList"),
+        editor: document.getElementById("editor"),
+        editorTitle: document.getElementById("editorTitle"),
+        wash: document.getElementById("wash"),
+        gradTop: document.getElementById("gradTop"),
+        gradBottom: document.getElementById("gradBottom"),
+        fade: document.getElementById("fade"),
+        cssOut: document.getElementById("cssOut"),
+        summary: document.getElementById("summary"),
+        blur: document.getElementById("blur"),
+        copyBtn: document.getElementById("copyBtn"),
+        resetBtn: document.getElementById("resetBtn"),
+      };
+
+      const LAYERS = [
+        {
+          id: "fade",
+          name: "4. White fade",
+          meta: "resolves bottom to white",
+        },
+        {
+          id: "bottom",
+          name: "3. Bottom conic",
+          meta: "blurred color haze",
+        },
+        {
+          id: "top",
+          name: "2. Top conic",
+          meta: "blurred color haze",
+        },
+        {
+          id: "wash",
+          name: "1. Base wash",
+          meta: "gray tint on white",
+        },
+      ];
+
+      function clamp(n, min, max) {
+        return Math.min(max, Math.max(min, n));
+      }
+
+      function hexToRgb(hex) {
+        const h = hex.replace("#", "");
+        const full =
+          h.length === 3
+            ? h
+                .split("")
+                .map((c) => c + c)
+                .join("")
+            : h;
+        const n = parseInt(full, 16);
+        return {
+          r: (n >> 16) & 255,
+          g: (n >> 8) & 255,
+          b: n & 255,
+        };
+      }
+
+      function rgba(hex, alphaPct) {
+        const { r, g, b } = hexToRgb(hex);
+        return `rgb(${r} ${g} ${b} / ${alphaPct}%)`;
+      }
+
+      function topConic(cfg) {
+        return `conic-gradient(
+    from ${cfg.from}deg at ${cfg.atX}% ${cfg.atY}%,
+    ${cfg.colorA} -9.2deg,
+    ${cfg.colorB} 166.22deg,
+    ${cfg.colorC} 181.28deg,
+    ${cfg.colorA} 350.8deg,
+    ${cfg.colorB} 526.22deg
+  )`;
+      }
+
+      function bottomConic(cfg) {
+        return `conic-gradient(
+    from ${cfg.from}deg at ${cfg.atX}% ${cfg.atY}%,
+    ${cfg.colorA} -166.22deg,
+    ${cfg.colorB} 9.2deg,
+    ${cfg.colorC} 178.72deg,
+    ${cfg.colorA} 193.78deg,
+    ${cfg.colorB} 369.2deg
+  )`;
+      }
+
+      function exportCss() {
+        const { wash, top, bottom, fade, blur } = state;
+        return `/* Conversation surface = 4 layers */
+
+.mainColumn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    linear-gradient(0deg, ${rgba(wash.color, wash.opacity)}, ${rgba(wash.color, wash.opacity)}),
+    #fff;
+}
+
+.mainColumn::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: min(${fade.heightPx}px, ${fade.heightPct}%);
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0%) 0%,
+    rgb(255 255 255 / ${fade.midOpacity}%) ${fade.midStop}%,
+    #fff 100%
+  );
+  ${fade.enabled ? "" : "/* currently disabled in playground */"}
+}
+
+.stageGradientTop,
+.stageGradientBottom {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(${blur}px);
+}
+
+.stageGradientTop {
+  width: min(${top.width}px, 200%);
+  height: ${top.height}px;
+  left: calc(50% - min(${top.width}px, 200%) / 2 + ${top.offsetX}px);
+  top: ${top.top}px;
+  background: ${topConic(top)};
+}
+
+.stageGradientBottom {
+  width: min(${bottom.width}px, 200%);
+  height: ${bottom.height}px;
+  left: calc(50% - min(${bottom.width}px, 200%) / 2 + ${bottom.offsetX}px);
+  bottom: ${bottom.bottom}px;
+  background: ${bottomConic(bottom)};
+  mask-image: linear-gradient(180deg, #000 0%, #000 ${bottom.maskSolid}%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 ${bottom.maskSolid}%, transparent 100%);
+}`;
+      }
+
+      function applyPreview() {
+        const { wash, top, bottom, fade, blur } = state;
+
+        els.wash.style.display = wash.enabled ? "block" : "none";
+        els.wash.style.background = `linear-gradient(0deg, ${rgba(wash.color, wash.opacity)}, ${rgba(wash.color, wash.opacity)})`;
+
+        els.gradTop.style.display = top.enabled ? "block" : "none";
+        els.gradTop.style.filter = `blur(${blur}px)`;
+        els.gradTop.style.width = `min(${top.width}px, 200%)`;
+        els.gradTop.style.height = `${top.height}px`;
+        els.gradTop.style.left = `calc(50% - min(${top.width}px, 200%) / 2 + ${top.offsetX}px)`;
+        els.gradTop.style.top = `${top.top}px`;
+        els.gradTop.style.background = topConic(top);
+
+        els.gradBottom.style.display = bottom.enabled ? "block" : "none";
+        els.gradBottom.style.filter = `blur(${blur}px)`;
+        els.gradBottom.style.width = `min(${bottom.width}px, 200%)`;
+        els.gradBottom.style.height = `${bottom.height}px`;
+        els.gradBottom.style.left = `calc(50% - min(${bottom.width}px, 200%) / 2 + ${bottom.offsetX}px)`;
+        els.gradBottom.style.bottom = `${bottom.bottom}px`;
+        els.gradBottom.style.background = bottomConic(bottom);
+        const mask = `linear-gradient(180deg, #000 0%, #000 ${bottom.maskSolid}%, transparent 100%)`;
+        els.gradBottom.style.maskImage = mask;
+        els.gradBottom.style.webkitMaskImage = mask;
+
+        els.fade.style.display = fade.enabled ? "block" : "none";
+        els.fade.style.height = `min(${fade.heightPx}px, ${fade.heightPct}%)`;
+        els.fade.style.background = `linear-gradient(180deg, rgb(255 255 255 / 0%) 0%, rgb(255 255 255 / ${fade.midOpacity}%) ${fade.midStop}%, #fff 100%)`;
+
+        els.blur.value = String(blur);
+        els.cssOut.textContent = exportCss();
+        const on = [
+          wash.enabled && "wash",
+          top.enabled && "top",
+          bottom.enabled && "bottom",
+          fade.enabled && "fade",
+        ].filter(Boolean);
+        els.summary.textContent = `${on.length}/4 layers on · blur ${blur}px`;
+        renderLayerList();
+      }
+
+      function renderLayerList() {
+        els.layerList.innerHTML = "";
+        for (const layer of LAYERS) {
+          const enabled =
+            layer.id === "wash"
+              ? state.wash.enabled
+              : layer.id === "top"
+                ? state.top.enabled
+                : layer.id === "bottom"
+                  ? state.bottom.enabled
+                  : state.fade.enabled;
+
+          const row = document.createElement("div");
+          row.className = `layer-row${selected === layer.id ? " active" : ""}`;
+
+          const toggle = document.createElement("input");
+          toggle.type = "checkbox";
+          toggle.checked = enabled;
+          toggle.addEventListener("change", () => {
+            if (layer.id === "wash") state.wash.enabled = toggle.checked;
+            if (layer.id === "top") state.top.enabled = toggle.checked;
+            if (layer.id === "bottom") state.bottom.enabled = toggle.checked;
+            if (layer.id === "fade") state.fade.enabled = toggle.checked;
+            applyPreview();
+          });
+
+          const select = document.createElement("button");
+          select.className = "select";
+          select.type = "button";
+          select.textContent = layer.name;
+          select.addEventListener("click", () => {
+            selected = layer.id;
+            renderEditor();
+            applyPreview();
+          });
+
+          const meta = document.createElement("div");
+          meta.className = "meta";
+          meta.textContent = layer.meta;
+
+          row.append(toggle, select, meta);
+          els.layerList.append(row);
+        }
+      }
+
+      function rangeField(label, value, min, max, step, onInput) {
+        const wrap = document.createElement("label");
+        const title = document.createElement("div");
+        title.innerHTML = `${label} <span class="value">${value}</span>`;
+        const input = document.createElement("input");
+        input.type = "range";
+        input.min = String(min);
+        input.max = String(max);
+        input.step = String(step);
+        input.value = String(value);
+        input.addEventListener("input", () => {
+          const n = Number(input.value);
+          title.querySelector(".value").textContent = String(n);
+          onInput(n);
+          applyPreview();
+        });
+        wrap.append(title, input);
+        return wrap;
+      }
+
+      function colorField(label, value, onInput) {
+        const wrap = document.createElement("label");
+        wrap.textContent = label;
+        const row = document.createElement("div");
+        row.className = "color-row";
+        const color = document.createElement("input");
+        color.type = "color";
+        color.value = value;
+        const text = document.createElement("input");
+        text.type = "text";
+        text.value = value;
+        text.style.height = "34px";
+        text.style.border = "1px solid var(--border)";
+        text.style.borderRadius = "6px";
+        text.style.padding = "0 8px";
+        color.addEventListener("input", () => {
+          text.value = color.value;
+          onInput(color.value);
+          applyPreview();
+        });
+        text.addEventListener("change", () => {
+          const v = text.value.trim();
+          if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)) {
+            color.value = v.length === 4 ? "#" + [...v.slice(1)].map((c) => c + c).join("") : v;
+            onInput(color.value);
+            applyPreview();
+          }
+        });
+        row.append(color, text);
+        wrap.append(row);
+        return wrap;
+      }
+
+      function renderEditor() {
+        els.editor.innerHTML = "";
+        if (selected === "wash") {
+          els.editorTitle.textContent = "Edit: base wash";
+          els.editor.append(
+            colorField("Wash color", state.wash.color, (v) => (state.wash.color = v)),
+            rangeField("Opacity %", state.wash.opacity, 0, 40, 1, (v) => (state.wash.opacity = v)),
+          );
+        } else if (selected === "top") {
+          els.editorTitle.textContent = "Edit: top conic";
+          els.editor.append(
+            colorField("Color A", state.top.colorA, (v) => (state.top.colorA = v)),
+            colorField("Color B", state.top.colorB, (v) => (state.top.colorB = v)),
+            colorField("Color C", state.top.colorC, (v) => (state.top.colorC = v)),
+            rangeField("Height", state.top.height, 20, 240, 1, (v) => (state.top.height = v)),
+            rangeField("Top offset", state.top.top, -200, 80, 1, (v) => (state.top.top = v)),
+            rangeField("X offset", state.top.offsetX, -120, 120, 0.5, (v) => (state.top.offsetX = v)),
+            rangeField("From deg", state.top.from, 0, 360, 0.1, (v) => (state.top.from = v)),
+          );
+        } else if (selected === "bottom") {
+          els.editorTitle.textContent = "Edit: bottom conic";
+          els.editor.append(
+            colorField("Color A", state.bottom.colorA, (v) => (state.bottom.colorA = v)),
+            colorField("Color B", state.bottom.colorB, (v) => (state.bottom.colorB = v)),
+            colorField("Color C", state.bottom.colorC, (v) => (state.bottom.colorC = v)),
+            rangeField("Height", state.bottom.height, 10, 160, 1, (v) => (state.bottom.height = v)),
+            rangeField("Bottom offset", state.bottom.bottom, 0, 240, 1, (v) => (state.bottom.bottom = v)),
+            rangeField("X offset", state.bottom.offsetX, -120, 120, 0.5, (v) => (state.bottom.offsetX = v)),
+            rangeField("Mask solid %", state.bottom.maskSolid, 0, 100, 1, (v) => (state.bottom.maskSolid = v)),
+          );
+        } else {
+          els.editorTitle.textContent = "Edit: white fade";
+          els.editor.append(
+            rangeField("Height px", state.fade.heightPx, 40, 480, 1, (v) => (state.fade.heightPx = v)),
+            rangeField("Height %", state.fade.heightPct, 10, 80, 1, (v) => (state.fade.heightPct = v)),
+            rangeField("Mid opacity %", state.fade.midOpacity, 0, 100, 1, (v) => (state.fade.midOpacity = v)),
+            rangeField("Mid stop %", state.fade.midStop, 0, 100, 1, (v) => (state.fade.midStop = v)),
+          );
+        }
+      }
+
+      els.blur.addEventListener("input", () => {
+        state.blur = clamp(Number(els.blur.value), 0, 320);
+        applyPreview();
+      });
+
+      els.resetBtn.addEventListener("click", () => {
+        state = structuredClone(DEFAULTS);
+        selected = "fade";
+        renderEditor();
+        applyPreview();
+      });
+
+      els.copyBtn.addEventListener("click", async () => {
+        const css = exportCss();
+        try {
+          await navigator.clipboard.writeText(css);
+          els.copyBtn.textContent = "Copied";
+          setTimeout(() => (els.copyBtn.textContent = "Copy CSS"), 1200);
+        } catch {
+          els.cssOut.focus();
+          document.execCommand("selectAll");
+        }
+      });
+
+      renderEditor();
+      applyPreview();
+    </script>
+  </body>
+</html>
