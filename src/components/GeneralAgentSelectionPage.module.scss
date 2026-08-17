@@ -107,20 +107,10 @@
   margin-inline: -32px;
   padding: 8px 32px 16px;
   scroll-snap-type: x mandatory;
-  scrollbar-color: rgb(50 51 56 / 35%) transparent;
-  scrollbar-width: thin;
+  scrollbar-width: none;
 
   &::-webkit-scrollbar {
-    height: 8px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgb(50 51 56 / 35%);
-    border-radius: 999px;
+    display: none;
   }
 }
 
@@ -257,12 +247,15 @@
   margin-top: 8px;
 }
 
-.dot,
-.dotActive {
+.dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: rgb(255 255 255 / 70%);
+  transition:
+    width 220ms ease,
+    border-radius 220ms ease,
+    background-color 220ms ease;
 }
 
 .dotActive {

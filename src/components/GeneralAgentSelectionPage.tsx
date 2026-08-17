@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState, type UIEvent } from "react";
 import { Button } from "@vibe/core";
 import {
   getAgentCardsForFocus,
@@ -7,6 +7,39 @@ import {
 } from "../data/generalOnboardingData";
 import type { AgentFlowId } from "../data/agentFlows";
 import styles from "./GeneralAgentSelectionPage.module.scss";
+
+const SCROLL_EDGE_PX = 16;
+
+function getActiveCardIndex(
+  row: HTMLDivElement | null,
+  cardCount: number,
+): number {
+  if (!row || cardCount <= 1) return 0;
+
+  const maxScroll = row.scrollWidth - row.clientWidth;
+  if (maxScroll <= 0) return 0;
+
+  if (row.scrollLeft <= SCROLL_EDGE_PX) return 0;
+  if (row.scrollLeft >= maxScroll - SCROLL_EDGE_PX) return cardCount - 1;
+
+  const rowRect = row.getBoundingClientRect();
+  const rowCenter = rowRect.left + rowRect.width / 2;
+  let closestIndex = 0;
+  let closestDistance = Number.POSITIVE_INFINITY;
+
+  Array.from(row.children).forEach((child, index) => {
+    if (!(child instanceof HTMLElement)) return;
+    const childRect = child.getBoundingClientRect();
+    const childCenter = childRect.left + childRect.width / 2;
+    const distance = Math.abs(childCenter - rowCenter);
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestIndex = index;
+    }
+  });
+
+  return closestIndex;
+}
 
 function AgentSelectionCard({
   card,
@@ -83,11 +116,18 @@ export function GeneralAgentSelectionPage({
 }) {
   const cards = getAgentCardsForFocus(focusId);
   const resolvedFocusLabel = focusLabel ?? getFocusLabel(focusId);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const handleCardSelect = (card: GeneralAgentCard) => {
     if (card.flowId) {
       onSelectAgent(card.flowId, card);
     }
+  };
+
+  const handleCardRowScroll = (event: UIEvent<HTMLDivElement>) => {
+    const row = event.currentTarget;
+    const nextIndex = getActiveCardIndex(row, cards.length);
+    setActiveIndex((prev) => (prev === nextIndex ? prev : nextIndex));
   };
 
   return (
@@ -109,7 +149,7 @@ export function GeneralAgentSelectionPage({
           <p className={styles.subtitle}>Pick one to start. Add more later.</p>
         </div>
 
-        <div className={styles.cardRow}>
+        <div className={styles.cardRow} onScroll={handleCardRowScroll}>
           {cards.map((card) => (
             <AgentSelectionCard
               key={card.id}
@@ -123,7 +163,11 @@ export function GeneralAgentSelectionPage({
           {cards.map((card, index) => (
             <span
               key={card.id}
-              className={index === 0 ? styles.dotActive : styles.dot}
+              className={
+                index === activeIndex
+                  ? `${styles.dot} ${styles.dotActive}`
+                  : styles.dot
+              }
             />
           ))}
         </div>
