@@ -39,24 +39,9 @@ export const GENERAL_FOCUS_OPTIONS: readonly GeneralFocusOption[] = [
     description: "Timelines, tasks, team coordination",
   },
   {
-    id: "sales",
-    title: "Sales & CRM",
-    description: "Leads, deals, customer relationships",
-  },
-  {
-    id: "people",
-    title: "People & recruiting",
-    description: "Hiring, onboarding, HR processes",
-  },
-  {
     id: "marketing",
     title: "Marketing & content",
     description: "Campaigns, launches, creative work",
-  },
-  {
-    id: "dev",
-    title: "Dev & product",
-    description: "Sprints, bugs, roadmap planning",
   },
   {
     id: "ops",
@@ -64,14 +49,19 @@ export const GENERAL_FOCUS_OPTIONS: readonly GeneralFocusOption[] = [
     description: "Processes, budgets, reporting",
   },
   {
-    id: "design",
-    title: "Design & Creative",
-    description: "Projects, feedback, delivery",
+    id: "sales",
+    title: "Sales & CRM",
+    description: "Leads, deals, customer relationships",
   },
   {
-    id: "it",
-    title: "IT",
-    description: "Requests, assets, incidents",
+    id: "productivity",
+    title: "Productivity",
+    description: "Workflows, focus, personal efficiency",
+  },
+  {
+    id: "other",
+    title: "Other",
+    description: "I'll figure it out as I go",
   },
 ] as const;
 
