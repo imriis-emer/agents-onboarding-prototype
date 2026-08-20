@@ -35,7 +35,8 @@ const WORKFLOW_TEMPLATES = [
   },
   {
     title: "Customer churn risk alert",
-    description: "When health score drops, notify owners and suggest next steps.",
+    description:
+      "When health score drops, notify owners and suggest next steps.",
   },
 ] as const;
 
@@ -49,7 +50,8 @@ export function WorkflowsPage() {
           <>
             From now on, you can turn any process into an automated workflow.
             <br />
-            Describe what needs to happen and Workflows builds the steps for you.
+            Describe what needs to happen and Workflows builds the steps for
+            you.
           </>
         }
         actionLabel="Show me how"
@@ -70,7 +72,10 @@ export function WorkflowsPage() {
           </Text>
         </div>
 
-        <div className={styles.composerBorder} data-tour-target="workflows-composer">
+        <div
+          className={styles.composerBorder}
+          data-tour-target="workflows-composer"
+        >
           <div className={styles.composerWrap}>
             <textarea
               className={styles.composerInput}
@@ -98,8 +103,15 @@ export function WorkflowsPage() {
         </Button>
       </section>
 
-      <section className={styles.templateSection} data-tour-target="workflows-templates">
-        <Flex align="center" justify="space-between" className={styles.templateHeader}>
+      <section
+        className={styles.templateSection}
+        data-tour-target="workflows-templates"
+      >
+        <Flex
+          align="center"
+          justify="space-between"
+          className={styles.templateHeader}
+        >
           <Text type="text1" weight="medium" color="primary">
             Start with a template
           </Text>

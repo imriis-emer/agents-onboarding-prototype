@@ -26,6 +26,8 @@ export interface AgentFlowOverride {
 const RUBY_AD_CREATIVE_FIRST_ACTION =
   "Generate ad concepts from a campaign brief";
 
+const LIAM_PM_FIRST_ACTION = "Capture project goals and scope";
+
 /** Role-matched next steps when a general-flow Ruby Ad Creative handoff
  *  is active — applied even if the in-memory override was created before
  *  these fields existed (e.g. mid-session HMR). */
@@ -59,16 +61,53 @@ function rubyAdCreativeNextSteps(): Pick<
   };
 }
 
-export function isRubyAdCreativeOverride(
-  override: AgentFlowOverride,
-): boolean {
+function liamProjectManagerNextSteps(): Pick<
+  AgentFlowConfig,
+  | "firstActionTitle"
+  | "actionOptions"
+  | "firstActionDefault"
+  | "getStartedTitle"
+  | "getStartedOptions"
+  | "onboardingReturnLines"
+> {
+  return {
+    firstActionTitle: "What's the first thing I can help you with?",
+    actionOptions: [
+      LIAM_PM_FIRST_ACTION,
+      "Keep delivery on track",
+      "Describe it in your own words",
+    ],
+    firstActionDefault: LIAM_PM_FIRST_ACTION,
+    getStartedTitle: "How would you like to get started?",
+    getStartedOptions: [
+      "I'll share the project brief",
+      "Walk me through the goals",
+      "I'll describe it here",
+    ],
+    onboardingReturnLines: [
+      "Capture goals and scope",
+      "Keep delivery on track",
+    ],
+  };
+}
+
+export function isRubyAdCreativeOverride(override: AgentFlowOverride): boolean {
   return (
     override.agentName === "Ruby" &&
     /ad creative/i.test(override.agentRole ?? "")
   );
 }
 
-export { rubyAdCreativeNextSteps };
+export function isLiamProjectManagerOverride(
+  override: AgentFlowOverride,
+): boolean {
+  return (
+    override.agentName === "Liam" &&
+    /project manager/i.test(override.agentRole ?? "")
+  );
+}
+
+export { rubyAdCreativeNextSteps, liamProjectManagerNextSteps };
 
 export function AgentFlowProvider({
   flowId,
@@ -86,7 +125,10 @@ export function AgentFlowProvider({
     const roleNextSteps =
       isRubyAdCreativeOverride(agentOverride) && !agentOverride.actionOptions
         ? rubyAdCreativeNextSteps()
-        : null;
+        : isLiamProjectManagerOverride(agentOverride) &&
+            !agentOverride.actionOptions
+          ? liamProjectManagerNextSteps()
+          : null;
 
     return {
       ...baseFlow,

@@ -322,7 +322,10 @@ function Content({
   }, [panelForceOpen]);
 
   React.useEffect(() => {
-    if (activeRailItem === "workspace" && workspaceEntryMode === "conversation") {
+    if (
+      activeRailItem === "workspace" &&
+      workspaceEntryMode === "conversation"
+    ) {
       setIsWorkspacePanelOpen(false);
     }
   }, [activeRailItem, workspaceEntryMode]);

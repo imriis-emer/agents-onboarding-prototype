@@ -66,7 +66,9 @@ function WorkspaceAvatar({ size }: { size: "large" | "small" }) {
   return (
     <span
       className={
-        size === "large" ? styles.workspaceAvatarLarge : styles.workspaceAvatarSmall
+        size === "large"
+          ? styles.workspaceAvatarLarge
+          : styles.workspaceAvatarSmall
       }
       aria-hidden="true"
     >
@@ -178,7 +180,11 @@ export function WorkspaceHomePage() {
                       </button>
                     </Flex>
 
-                    <Flex align="center" gap="small" className={styles.cleanupWrap}>
+                    <Flex
+                      align="center"
+                      gap="small"
+                      className={styles.cleanupWrap}
+                    >
                       <label className={styles.cleanupLabel}>
                         <input
                           type="checkbox"
@@ -188,12 +194,19 @@ export function WorkspaceHomePage() {
                             setCleanupMode(event.target.checked)
                           }
                         />
-                        <span className={styles.cleanupTrack} aria-hidden="true">
+                        <span
+                          className={styles.cleanupTrack}
+                          aria-hidden="true"
+                        >
                           <span className={styles.cleanupThumb} />
                         </span>
                         <span className={styles.cleanupText}>Cleanup mode</span>
                       </label>
-                      <Flex align="center" gap="xs" className={styles.cleanupHint}>
+                      <Flex
+                        align="center"
+                        gap="xs"
+                        className={styles.cleanupHint}
+                      >
                         <MondayMulticolorMark />
                         <Text type="text2" color="secondary" ellipsis={false}>
                           No cleanup suggestions found

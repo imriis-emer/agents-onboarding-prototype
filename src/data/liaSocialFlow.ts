@@ -99,8 +99,14 @@ export const LIA_LINKEDIN_VIDEO_ARTIFACT = {
 export const LIA_BRAND_RESEARCH_STEPS = [
   { id: "browse", label: "Browsing nike.com" },
   { id: "found", label: "Found brand-nike.com" },
-  { id: "tone", label: "Tone of voice: motivational, confident, and empowering" },
-  { id: "logo", label: "Logo: Known as the Swoosh, represents motion, speed, and power" },
+  {
+    id: "tone",
+    label: "Tone of voice: motivational, confident, and empowering",
+  },
+  {
+    id: "logo",
+    label: "Logo: Known as the Swoosh, represents motion, speed, and power",
+  },
   {
     id: "voice",
     label: 'What to say: simple, direct, and powerful — "just do it"',
@@ -108,8 +114,14 @@ export const LIA_BRAND_RESEARCH_STEPS = [
 ] as const;
 
 export const LIA_DRAFTING_STEPS = [
-  { id: "perspective", label: "Drafting from your perspective — you built this, I'm the punchline" },
-  { id: "voice", label: "Writing in nike.com brand voice: confident, direct, no hype" },
+  {
+    id: "perspective",
+    label: "Drafting from your perspective — you built this, I'm the punchline",
+  },
+  {
+    id: "voice",
+    label: "Writing in nike.com brand voice: confident, direct, no hype",
+  },
   { id: "video", label: "Attaching my intro video as the media asset" },
   { id: "writing", label: "Writing your post…" },
 ] as const;
@@ -119,8 +131,7 @@ export const LIA_TOUR_TOOLTIPS = {
     "You'll always find me here, under the Agents tab. Click on me anytime you need something.",
   content:
     "These are your boards — where you, your team, and I do the work together.",
-  focusBoard:
-    "This is your Social Media Content board — where our work lives.",
+  focusBoard: "This is your Social Media Content board — where our work lives.",
 } as const;
 
 export const LIA_AUTOMATION_OPTIONS = [
@@ -241,14 +252,26 @@ export const LIA_DRAFT_SCRIPT = [
   { id: "l3", text: LIA_DRAFT_MESSAGES.postSuggestion },
   { id: "l4", text: LIA_DRAFT_MESSAGES.draftingIntro },
   { id: "l5", text: LIA_DRAFT_MESSAGES.postDelivered },
-  { id: "l6", text: LIA_DRAFT_MESSAGES.savePrompt, paragraphActions: { 1: LIA_CONNECT_LINKEDIN_LABEL } },
+  {
+    id: "l6",
+    text: LIA_DRAFT_MESSAGES.savePrompt,
+    paragraphActions: { 1: LIA_CONNECT_LINKEDIN_LABEL },
+  },
   { id: "l7", text: LIA_DRAFT_MESSAGES.automationAsk },
   { id: "l8", text: LIA_DRAFT_MESSAGES.teamAsk },
   { id: "l9", text: LIA_DRAFT_MESSAGES.inviteDone },
   { id: "l10", text: LIA_DRAFT_MESSAGES.tourOffer },
-  { id: "l11", text: LIA_DRAFT_MESSAGES.tourStep1, paragraphIllustrations: TOUR_STEP_1_PARAGRAPH_ILLUSTRATIONS },
+  {
+    id: "l11",
+    text: LIA_DRAFT_MESSAGES.tourStep1,
+    paragraphIllustrations: TOUR_STEP_1_PARAGRAPH_ILLUSTRATIONS,
+  },
   { id: "l12", text: LIA_DRAFT_MESSAGES.tourStep2 },
-  { id: "l13", text: LIA_DRAFT_MESSAGES.tourStep3, paragraphBoardChips: { 0: "Social Media Content board" } },
+  {
+    id: "l13",
+    text: LIA_DRAFT_MESSAGES.tourStep3,
+    paragraphBoardChips: { 0: "Social Media Content board" },
+  },
   { id: "l14", text: LIA_DRAFT_MESSAGES.tourEnd },
 ] as const;
 

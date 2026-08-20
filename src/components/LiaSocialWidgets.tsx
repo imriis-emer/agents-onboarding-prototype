@@ -29,7 +29,10 @@ export function LiaBrandResearchCard() {
 export function LiaDraftingCard() {
   const flow = useAgentFlow();
   return (
-    <PlanInActionThinking steps={LIA_DRAFTING_STEPS} avatar={flow.assets.avatar} />
+    <PlanInActionThinking
+      steps={LIA_DRAFTING_STEPS}
+      avatar={flow.assets.avatar}
+    />
   );
 }
 
@@ -122,7 +125,9 @@ export function LiaChipCard({
         ))}
         {hasCustomOption ? (
           <div className={styles.actionCustomRow}>
-            <span className={styles.actionOptionIndex}>{chipOptions.length + 1}</span>
+            <span className={styles.actionOptionIndex}>
+              {chipOptions.length + 1}
+            </span>
             <TextField
               className={styles.actionCustomField}
               placeholder={lastOption}
@@ -182,7 +187,10 @@ export function LinkedInPostCard() {
             className={styles.boardArtifactPreview}
             onClick={() => setShowVideoModal(true)}
           >
-            <span className={styles.boardArtifactPreviewIcon} aria-hidden="true">
+            <span
+              className={styles.boardArtifactPreviewIcon}
+              aria-hidden="true"
+            >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <path
                   d="M6 2.5C3.5 2.5 1.44 4.23 0.75 6.5c0.69 2.27 2.75 4 5.25 4s4.56-1.73 5.25-4C10.56 4.23 8.5 2.5 6 2.5Z"

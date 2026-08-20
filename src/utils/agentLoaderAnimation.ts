@@ -25,9 +25,7 @@ export const LIA_LOADING_MESSAGES = [
   "Your agent is nearly here…",
 ] as const;
 
-export const ACCOUNT_CREATING_MESSAGES = [
-  "Creating your account…",
-] as const;
+export const ACCOUNT_CREATING_MESSAGES = ["Creating your account…"] as const;
 
 export function messageWithoutDots(message: string): string {
   return message.replace(/(?:\.{3}|…)$/, "");

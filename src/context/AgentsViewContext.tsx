@@ -12,6 +12,8 @@ export type AgentsView = "home" | "manage" | "feed";
 interface AgentsViewContextValue {
   view: AgentsView;
   setView: (view: AgentsView) => void;
+  /** First-time agents landing: empty composer and no existing agents in the pane. */
+  isFirstVisit: boolean;
 }
 
 const AgentsViewContext = createContext<AgentsViewContextValue | null>(null);
@@ -20,10 +22,12 @@ export function AgentsViewProvider({
   children,
   initialView = "home",
   onViewChange,
+  isFirstVisit = false,
 }: {
   children: ReactNode;
   initialView?: AgentsView;
   onViewChange?: (view: AgentsView) => void;
+  isFirstVisit?: boolean;
 }) {
   const [view, setViewState] = useState<AgentsView>(initialView);
 
@@ -35,7 +39,10 @@ export function AgentsViewProvider({
     [onViewChange],
   );
 
-  const value = useMemo(() => ({ view, setView }), [view, setView]);
+  const value = useMemo(
+    () => ({ view, setView, isFirstVisit }),
+    [view, setView, isFirstVisit],
+  );
 
   return (
     <AgentsViewContext.Provider value={value}>

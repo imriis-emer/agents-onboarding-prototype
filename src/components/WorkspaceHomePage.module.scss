@@ -285,8 +285,8 @@
   border: var(--border-width) dashed var(--ui-border-color);
   border-radius: var(--border-radius-small);
   background:
-    linear-gradient(var(--ui-border-color), var(--ui-border-color)) center / 12px
-      1px no-repeat,
+    linear-gradient(var(--ui-border-color), var(--ui-border-color)) center /
+      12px 1px no-repeat,
     linear-gradient(var(--ui-border-color), var(--ui-border-color)) center / 1px
       12px no-repeat;
 }

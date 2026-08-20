@@ -12,11 +12,8 @@
   position: absolute;
   inset: 0 0 auto 0;
   height: 640px;
-  background-image: linear-gradient(
-      to right,
-      rgb(0 0 0 / 5%) 1px,
-      transparent 1px
-    ),
+  background-image:
+    linear-gradient(to right, rgb(0 0 0 / 5%) 1px, transparent 1px),
     linear-gradient(to bottom, rgb(0 0 0 / 5%) 1px, transparent 1px);
   background-size: 132px 132px;
   -webkit-mask-image: radial-gradient(
@@ -105,7 +102,9 @@
   font-family: var(--font-family);
   font-size: 14px;
   cursor: pointer;
-  transition: background-color 160ms ease, transform 160ms ease;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
 }
 
 .outlineButton {
@@ -192,7 +191,9 @@
   font-size: 16px;
   font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: background-color 160ms ease, transform 160ms ease;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
 
   &:hover {
     background: #000;

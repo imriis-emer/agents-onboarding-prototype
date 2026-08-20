@@ -95,7 +95,8 @@
   color: #323338;
   white-space: nowrap;
   transform-origin: left center;
-  animation: onboardingReturnPillIn 560ms cubic-bezier(0.22, 1, 0.36, 1) 140ms both;
+  animation: onboardingReturnPillIn 560ms cubic-bezier(0.22, 1, 0.36, 1) 140ms
+    both;
   transition:
     border-color var(--motion-productive-medium) ease,
     box-shadow var(--motion-productive-medium) ease,

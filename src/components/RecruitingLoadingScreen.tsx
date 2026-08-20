@@ -90,10 +90,7 @@ export function RecruitingLoadingScreen({
 
   return (
     <div
-      className={[
-        compact ? styles.compact : styles.page,
-        large && styles.large,
-      ]
+      className={[compact ? styles.compact : styles.page, large && styles.large]
         .filter(Boolean)
         .join(" ")}
       role="status"

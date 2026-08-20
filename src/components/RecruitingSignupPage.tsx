@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button, TextField } from "@vibe/core";
 import { useAgentFlow } from "../context/AgentFlowContext";
 import { MondayMulticolorMark } from "./ProductLogos";
+import generalSignupVisual from "../assets/agents-onboarding/general-signup-visual.png";
 import googleIcon from "../assets/recruiting-onboarding/google-icon.svg";
 import styles from "./RecruitingSignupPage.module.scss";
 
@@ -9,10 +10,13 @@ const EMAIL_PLACEHOLDER = "name@company.com";
 
 export function RecruitingSignupPage({
   onContinue,
+  isGeneralFlow,
 }: {
   onContinue: () => void;
+  isGeneralFlow?: boolean;
 }) {
   const flow = useAgentFlow();
+  const isGeneral = isGeneralFlow ?? flow.id === "general";
   const [email, setEmail] = useState("");
   const canContinue = email.trim().length > 0;
 
@@ -21,7 +25,7 @@ export function RecruitingSignupPage({
       <div className={styles.formPanel}>
         <div className={styles.formInner}>
           <div className={styles.headingBlock}>
-            {flow.id === "general" && (
+            {isGeneral && (
               <div className={styles.logo}>
                 <MondayMulticolorMark />
               </div>
@@ -93,7 +97,7 @@ export function RecruitingSignupPage({
 
       <div
         className={`${styles.visualPanel} ${
-          flow.id === "general"
+          isGeneral
             ? styles.visualPanelContain
             : flow.id === "jade"
               ? styles.visualPanelJade
@@ -103,9 +107,9 @@ export function RecruitingSignupPage({
       >
         <img
           className={`${styles.visualImage} ${
-            flow.id === "general" ? styles.visualImageContain : ""
+            isGeneral ? styles.visualImageContain : ""
           }`}
-          src={flow.signup.visual}
+          src={isGeneral ? generalSignupVisual : flow.signup.visual}
           alt=""
         />
       </div>

@@ -5,14 +5,12 @@ import generalSignupVisual from "../assets/agents-onboarding/general-signup-visu
 import mondayLoaderGif from "../assets/recruiting-onboarding/monday-loader.gif";
 import type { AgentFlowId } from "../data/agentFlows";
 import styles from "./GeneralAgentsSetupFlow.module.scss";
-import type { GeneralAgentCard } from "../data/generalOnboardingData";
+import {
+  skipsGeneralAgentSelection,
+  type GeneralAgentCard,
+} from "../data/generalOnboardingData";
 
-type FlowPhase =
-  | "focus"
-  | "cards-exit"
-  | "expanding"
-  | "loading"
-  | "selection";
+type FlowPhase = "focus" | "cards-exit" | "expanding" | "loading" | "selection";
 
 const CARDS_EXIT_MS = 420;
 const EXPAND_MS = 880;
@@ -72,10 +70,15 @@ export function GeneralAgentsSetupFlow({
 
     schedule(() => setPhase("expanding"), CARDS_EXIT_MS);
     schedule(() => setPhase("loading"), CARDS_EXIT_MS + EXPAND_MS);
-    schedule(() => {
-      onFocusComplete(nextFocusId, customLabel);
-      setPhase("selection");
-    }, CARDS_EXIT_MS + EXPAND_MS + LOADER_MS);
+    schedule(
+      () => {
+        onFocusComplete(nextFocusId, customLabel);
+        if (!skipsGeneralAgentSelection(nextFocusId)) {
+          setPhase("selection");
+        }
+      },
+      CARDS_EXIT_MS + EXPAND_MS + LOADER_MS,
+    );
   };
 
   const showForm =
@@ -84,9 +87,7 @@ export function GeneralAgentsSetupFlow({
   const hideFooter = phase === "expanding";
   const hideVisual = phase !== "focus";
   const isPanelExpanded =
-    phase === "expanding" ||
-    phase === "loading" ||
-    phase === "selection";
+    phase === "expanding" || phase === "loading" || phase === "selection";
   const showLoader = phase === "loading";
   const showSelection = phase === "selection";
 

@@ -4,14 +4,14 @@ import {
   LIA_POST_SAVE_OPTIONS,
   LIA_TOPIC_UNSURE_MESSAGE,
 } from "./liaSocialFlow";
-import {
-  BOARD_OFFER_POSITIVE,
-} from "./nikeScanFlow";
-import {
-  LIA_BOARD_OFFER_POSITIVE,
-} from "./liaSocialFlow";
+import { BOARD_OFFER_POSITIVE } from "./nikeScanFlow";
+import { LIA_BOARD_OFFER_POSITIVE } from "./liaSocialFlow";
 
-export type HiringFlow = "nike-scan" | "role-link" | "role-search" | "lia-draft";
+export type HiringFlow =
+  | "nike-scan"
+  | "role-link"
+  | "role-search"
+  | "lia-draft";
 
 export interface PrototypeScriptMessage {
   id: string;

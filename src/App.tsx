@@ -15,7 +15,9 @@ import { LoaderPreviewPage } from "./components/LoaderPreviewPage";
 import { PrototypeStepper } from "./components/PrototypeStepper";
 import {
   AgentFlowProvider,
+  isLiamProjectManagerOverride,
   isRubyAdCreativeOverride,
+  liamProjectManagerNextSteps,
   rubyAdCreativeNextSteps,
   type AgentFlowOverride,
 } from "./context/AgentFlowContext";
@@ -24,6 +26,7 @@ import {
   useWorkspaceBoards,
 } from "./context/WorkspaceBoardsContext";
 import { getAgentFlow, type AgentFlowId } from "./data/agentFlows";
+import { LIAM_POSTER_URL } from "./data/agentTemplates";
 import type { FlowAgentSelectionCard } from "./data/flowAgentSelectionData";
 import {
   getEntryPrototypeStepCount,
@@ -31,6 +34,10 @@ import {
 } from "./data/agentsOnboardingPrototypeSteps";
 import {
   GENERAL_DEFAULT_FOCUS_ID,
+  GENERAL_OTHER_FOCUS_ID,
+  PROJECTS_LIAM_CARD,
+  skipsGeneralAgentSelection,
+  startsProjectsAgentChat,
   type GeneralAgentCard,
 } from "./data/generalOnboardingData";
 import { initProduct, type ConfigProductName } from "./productConfig";
@@ -165,6 +172,12 @@ function AppInner() {
   const agentSelectionStepIndex = 3;
   const accountCreatingStepIndex = 4;
   const loadingStepIndex = 5;
+  const generalAgentSelectionStepIndex = 4;
+  const isGeneralInProductLanding =
+    selectedFlowId === "general" &&
+    prototypeStepIndex === generalAgentSelectionStepIndex &&
+    generalFocusId === GENERAL_OTHER_FOCUS_ID;
+  const isGeneralOtherGallery = isGeneralInProductLanding;
 
   const goToPrototypeStep = useCallback(
     (stepIndex: number) => {
@@ -194,6 +207,8 @@ function AppInner() {
       const role = card.title.toLowerCase();
       const isRubyAdCreative =
         card.agentName === "Ruby" && /ad creative/i.test(card.title);
+      const isLiamPm =
+        card.agentName === "Liam" && /project manager/i.test(card.title);
 
       return {
         agentName: card.agentName,
@@ -205,7 +220,9 @@ function AppInner() {
             id: "m1",
             text: isRubyAdCreative
               ? "I'll read your campaign brief, product, and target audience, generate ad concepts with paired copy and visuals."
-              : card.description,
+              : isLiamPm
+                ? "I'll capture your goals and scope so every project starts clear and finishes strong."
+                : card.description,
           },
           {
             id: "m2",
@@ -213,6 +230,19 @@ function AppInner() {
           },
         ],
         ...(isRubyAdCreative ? rubyAdCreativeNextSteps() : {}),
+        ...(isLiamPm ? liamProjectManagerNextSteps() : {}),
+        ...(isLiamPm
+          ? {
+              assets: {
+                heroIntro: card.poster,
+                heroPoster: card.poster,
+                avatar: LIAM_POSTER_URL,
+                portrait: LIAM_POSTER_URL,
+                agentFull: LIAM_POSTER_URL,
+                videoSrc: card.video,
+              },
+            }
+          : {}),
       };
     },
     [],
@@ -293,12 +323,18 @@ function AppInner() {
   // completion. Bumping the session key remounts AgentsOnboardingView fresh.
   const handleGeneralAgentSelect = useCallback(
     (flowId: AgentFlowId, card: GeneralAgentCard) => {
+      resetWorkspaceSession();
       setSelectedFlowAgent(buildGeneralAgentOverride(card));
       setSelectedFlowId(flowId);
       setPrototypeStepIndex(getEntryPrototypeStepCount(flowId) - 1);
       setOnboardingSessionKey((key) => key + 1);
+      commitHashRoute({
+        railItem: "workspace",
+        agentsView: "home",
+        sidekickChatId: null,
+      });
     },
-    [buildGeneralAgentOverride],
+    [buildGeneralAgentOverride, commitHashRoute, resetWorkspaceSession],
   );
 
   const handleWorkspaceHome = useCallback(() => {
@@ -343,7 +379,9 @@ function AppInner() {
     selectedFlowAgent?.onboardingReturnLines ??
     (selectedFlowAgent && isRubyAdCreativeOverride(selectedFlowAgent)
       ? rubyAdCreativeNextSteps().onboardingReturnLines
-      : activeOnboardingFlow.onboardingReturnLines);
+      : selectedFlowAgent && isLiamProjectManagerOverride(selectedFlowAgent)
+        ? liamProjectManagerNextSteps().onboardingReturnLines
+        : activeOnboardingFlow.onboardingReturnLines);
   const onboardingReturn = showOnboardingReturn
     ? {
         agentName: activeOnboardingAgentName,
@@ -489,9 +527,19 @@ function AppInner() {
   const prototypeStepper = loaderPreviewOpen ? null : (
     <PrototypeStepper
       stepIndex={prototypeStepIndex}
-      stepLabel={prototypeSteps[prototypeStepIndex]?.label ?? ""}
+      stepLabel={
+        isGeneralOtherGallery
+          ? "Agents gallery"
+          : (prototypeSteps[prototypeStepIndex]?.label ?? "")
+      }
       totalSteps={prototypeSteps.length}
-      stepLabels={prototypeSteps.map((step) => step.label)}
+      stepLabels={prototypeSteps.map((step) =>
+        selectedFlowId === "general" &&
+        step.id === "agent-selection" &&
+        generalFocusId === GENERAL_OTHER_FOCUS_ID
+          ? "Agents gallery"
+          : step.label,
+      )}
       onPrevious={() => goToPrototypeStep(prototypeStepIndex - 1)}
       onNext={() => goToPrototypeStep(prototypeStepIndex + 1)}
       onSelectStep={goToPrototypeStep}
@@ -549,6 +597,11 @@ function AppInner() {
             setSelectedFlowAgent(null);
             setSelectedFlowId(flowId);
             setPrototypeStepIndex(1);
+            commitHashRoute({
+              railItem: "workspace",
+              agentsView: "home",
+              sidekickChatId: null,
+            });
           }}
           onOpenLoaderPreview={() => setLoaderPreviewOpen(true)}
         />
@@ -567,6 +620,7 @@ function AppInner() {
     if (prototypeStepIndex === 2) {
       return (
         <RecruitingSignupPage
+          isGeneralFlow={selectedFlowId === "general"}
           onContinue={() =>
             goToPrototypeStep(
               selectedFlowId === "general" ? 3 : agentSelectionStepIndex,
@@ -604,7 +658,8 @@ function AppInner() {
 
     if (
       (prototypeStepIndex === 3 || prototypeStepIndex === 4) &&
-      selectedFlowId === "general"
+      selectedFlowId === "general" &&
+      !isGeneralInProductLanding
     ) {
       return (
         <GeneralAgentsSetupFlow
@@ -616,6 +671,20 @@ function AppInner() {
           onFocusComplete={(focusId, customLabel) => {
             setGeneralFocusId(focusId);
             setGeneralFocusLabel(customLabel ?? null);
+            if (startsProjectsAgentChat(focusId)) {
+              handleGeneralAgentSelect(
+                PROJECTS_LIAM_CARD.flowId ?? "lia",
+                PROJECTS_LIAM_CARD,
+              );
+              return;
+            }
+            if (skipsGeneralAgentSelection(focusId)) {
+              commitHashRoute({
+                railItem: "agents",
+                agentsView: "home",
+                sidekickChatId: null,
+              });
+            }
             goToPrototypeStep(4);
           }}
           onSelectAgent={handleGeneralAgentSelect}
@@ -640,6 +709,7 @@ function AppInner() {
         key={`agents-${hashRoute.agentsView}`}
         initialView={hashRoute.agentsView}
         onViewChange={handleAgentsViewChange}
+        isFirstVisit={isGeneralInProductLanding}
       >
         <SidekickViewProvider
           key={`sidekick-${hashRoute.sidekickChatId ?? "home"}`}
