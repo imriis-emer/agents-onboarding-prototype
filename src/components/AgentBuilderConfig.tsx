@@ -23,6 +23,17 @@ const C_GREY = "var(--allgrey-background-color)";
 const FONT_TITLE = "var(--title-font-family)";
 const FONT_BODY = "var(--font-family)";
 
+function resolveInitialExpertise(
+  preselected: AgentConfigInitial | null,
+): string {
+  if (!preselected?.expertise) return "Feedback Intelligence expert";
+  const text = preselected.expertise.trim();
+  if (text.length <= 48 && !/[.!?]|I'll |I will /i.test(text)) {
+    return text;
+  }
+  return summarizeExpertise(text) + " expert";
+}
+
 export function AgentBuilderConfig({
   initial,
 }: {
@@ -53,18 +64,12 @@ export function AgentBuilderConfig({
   const [expertise, setExpertise] = useState("");
   const [displayedHeader, setDisplayedHeader] = useState("");
   const [confirmedExpertise, setConfirmedExpertise] = useState(
-    preselected?.expertise
-      ? summarizeExpertise(preselected.expertise) + " expert"
-      : "Feedback Intelligence expert",
+    resolveInitialExpertise(preselected),
   );
   const titleTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [showTitleCursor, setShowTitleCursor] = useState(false);
   const currentHeaderRef = useRef("");
-  const currentSubtitleRef = useRef(
-    preselected?.expertise
-      ? summarizeExpertise(preselected.expertise) + " expert"
-      : "Feedback Intelligence expert",
-  );
+  const currentSubtitleRef = useRef(resolveInitialExpertise(preselected));
   const confirmedNameRef = useRef(preselected?.name ?? "Elena");
 
   const [typewriterPhase, setTypewriterPhase] = useState<
@@ -185,9 +190,7 @@ export function AgentBuilderConfig({
     typewriterDone.current = true;
 
     const targetName = preselected?.name ?? "Elena";
-    const targetExpertise = preselected?.expertise
-      ? summarizeExpertise(preselected.expertise) + " expert"
-      : "Feedback Intelligence expert";
+    const targetExpertise = resolveInitialExpertise(preselected);
     const typeSpeed = 60;
     const expertiseTypeSpeed = 30;
     const pauseBetween = 400;

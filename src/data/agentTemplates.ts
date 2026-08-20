@@ -8,17 +8,19 @@ import { publicAssetUrl } from "../utils/publicAssetUrl";
 // Showcase cards (Liam, Tessa, Sasha) play an intro video on hover but have no
 // live conversation flow. Cloudinary serves a poster frame from the same URL
 // with a .jpg extension, so the still preview matches the video.
-const LIAM_VIDEO_URL =
-  "https://dapulse-res.cloudinary.com/video/upload/v1782893848/monday_platform/AI%20agents/avatar_videos/Liam_12282820664_20260701-111156/Liam_1x1_from_16x9_20260701-111156.mp4";
-const TESSA_VIDEO_URL =
-  "https://dapulse-res.cloudinary.com/video/upload/v1782893114/monday_platform/AI%20agents/avatar_videos/Tessa_12282834262_20260701-110421/Tessa_1x1_from_16x9_20260701-110421.mp4";
-const SASHA_VIDEO_URL =
-  "https://dapulse-res.cloudinary.com/video/upload/v1782893123/monday_platform/AI%20agents/avatar_videos/Sasha_12282847592_20260701-110421/Sasha_1x1_from_16x9_20260701-110421.mp4";
-
 const posterFrom = (videoUrl: string) => videoUrl.replace(/\.mp4$/, ".jpg");
-const LIAM_POSTER_URL = posterFrom(LIAM_VIDEO_URL);
-const TESSA_POSTER_URL = posterFrom(TESSA_VIDEO_URL);
-const SASHA_POSTER_URL = posterFrom(SASHA_VIDEO_URL);
+export const LIAM_VIDEO_URL =
+  "https://dapulse-res.cloudinary.com/video/upload/v1782893848/monday_platform/AI%20agents/avatar_videos/Liam_12282820664_20260701-111156/Liam_1x1_from_16x9_20260701-111156.mp4";
+export const LIAM_WIDE_VIDEO_URL =
+  "https://dapulse-res.cloudinary.com/video/upload/v1782893848/monday_platform/AI%20agents/avatar_videos/Liam_12282820664_20260701-111156/Liam_16x9_20260701-111156.mp4";
+export const TESSA_VIDEO_URL =
+  "https://dapulse-res.cloudinary.com/video/upload/v1782893114/monday_platform/AI%20agents/avatar_videos/Tessa_12282834262_20260701-110421/Tessa_1x1_from_16x9_20260701-110421.mp4";
+export const SASHA_VIDEO_URL =
+  "https://dapulse-res.cloudinary.com/video/upload/v1782893123/monday_platform/AI%20agents/avatar_videos/Sasha_12282847592_20260701-110421/Sasha_1x1_from_16x9_20260701-110421.mp4";
+export const LIAM_POSTER_URL = posterFrom(LIAM_VIDEO_URL);
+export const LIAM_WIDE_POSTER_URL = posterFrom(LIAM_WIDE_VIDEO_URL);
+export const TESSA_POSTER_URL = posterFrom(TESSA_VIDEO_URL);
+export const SASHA_POSTER_URL = posterFrom(SASHA_VIDEO_URL);
 
 export interface AgentTemplate {
   id: string;

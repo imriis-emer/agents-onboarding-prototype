@@ -363,10 +363,7 @@ export const AGENT_FLOWS: Record<AgentFlowId, AgentFlowConfig> = {
     ],
     firstActionTitle: "What's the first thing I can help you with?",
     getStartedTitle: "How would you like to get started?",
-    onboardingReturnLines: [
-      "Draft social content",
-      "Plan a content calendar",
-    ],
+    onboardingReturnLines: ["Draft social content", "Plan a content calendar"],
     actionOptions: [
       liaScanFlow.LIA_FIRST_ACTION_DEFAULT,
       "Plan a content calendar",

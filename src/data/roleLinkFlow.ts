@@ -65,7 +65,11 @@ export const ROLE_LINK_SCRIPT = [
   { id: "l7", text: ROLE_LINK_MESSAGES.teamAsk },
   { id: "l8", text: ROLE_LINK_MESSAGES.inviteDone },
   { id: "l9", text: ROLE_LINK_MESSAGES.tourOffer },
-  { id: "l10", text: ROLE_LINK_MESSAGES.tourStep1, paragraphIllustrations: TOUR_STEP_1_PARAGRAPH_ILLUSTRATIONS },
+  {
+    id: "l10",
+    text: ROLE_LINK_MESSAGES.tourStep1,
+    paragraphIllustrations: TOUR_STEP_1_PARAGRAPH_ILLUSTRATIONS,
+  },
   { id: "l11", text: ROLE_LINK_MESSAGES.tourStep2 },
   { id: "l12", text: ROLE_LINK_MESSAGES.tourStep3 },
   { id: "l13", text: ROLE_LINK_MESSAGES.tourEnd },

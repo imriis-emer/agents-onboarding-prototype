@@ -40,10 +40,18 @@ const AgentBuilderContext = createContext<AgentBuilderContextValue | null>(
   null,
 );
 
-export function AgentBuilderProvider({ children }: { children: ReactNode }) {
-  const [view, setView] = useState<AgentBuilderView>("closed");
+export function AgentBuilderProvider({
+  children,
+  initialView = "closed",
+  initialConfig = null,
+}: {
+  children: ReactNode;
+  initialView?: AgentBuilderView;
+  initialConfig?: AgentConfigInitial | null;
+}) {
+  const [view, setView] = useState<AgentBuilderView>(initialView);
   const [configInitial, setConfigInitial] = useState<AgentConfigInitial | null>(
-    null,
+    initialConfig,
   );
   const [pendingAgent, setPendingAgent] = useState<AgentConfigData | null>(
     null,

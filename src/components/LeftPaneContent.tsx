@@ -702,14 +702,24 @@ function UtilityPanelContent({
   activePanel: UtilityPanelId;
   onCloseNavigation: () => void;
 }) {
-  const { view: agentsView, setView: setAgentsView } = useAgentsView();
+  const {
+    view: agentsView,
+    setView: setAgentsView,
+    isFirstVisit,
+  } = useAgentsView();
   const {
     view: sidekickView,
     chatTitle: sidekickChatTitle,
     openChat: openSidekickChat,
     goHome: goSidekickHome,
   } = useSidekickView();
-  const state = UTILITY_PANEL_STATES[activePanel];
+  const state =
+    activePanel === "agents" && isFirstVisit
+      ? {
+          ...UTILITY_PANEL_STATES.agents,
+          contentSections: [{ title: "My agents", rows: [] }],
+        }
+      : UTILITY_PANEL_STATES[activePanel];
   const isSidekick = activePanel === "sidekick";
 
   return (
@@ -1310,7 +1320,9 @@ function WorkspaceHomeNavSection() {
           <button
             type="button"
             className={`${styles.contentBoardItem} ${
-              workspaceEntryMode === "board" ? styles.contentBoardItemActive : ""
+              workspaceEntryMode === "board"
+                ? styles.contentBoardItemActive
+                : ""
             }`}
             onClick={() => setWorkspaceEntryMode("board")}
           >

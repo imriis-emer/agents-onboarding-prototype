@@ -1,5 +1,9 @@
-import { useRef, useState, type UIEvent } from "react";
-import { Button } from "@vibe/core";
+import { useCallback, useEffect, useRef, useState, type UIEvent } from "react";
+import { Button, IconButton } from "@vibe/core";
+import {
+  DropdownChevronLeft,
+  DropdownChevronRight,
+} from "@mondaydotcomorg/icons";
 import {
   getAgentCardsForFocus,
   getFocusLabel,
@@ -10,28 +14,60 @@ import styles from "./GeneralAgentSelectionPage.module.scss";
 
 const SCROLL_EDGE_PX = 16;
 
+function getCardElements(scroller: HTMLDivElement): HTMLElement[] {
+  const row = scroller.firstElementChild;
+  if (!row) return [];
+  return Array.from(row.children).filter(
+    (child): child is HTMLElement => child instanceof HTMLElement,
+  );
+}
+
+function getMaxScroll(scroller: HTMLDivElement): number {
+  return Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+}
+
+function getCardStep(scroller: HTMLDivElement): number {
+  const cards = getCardElements(scroller);
+  const card = cards[0];
+  if (!card) return 0;
+
+  const row = scroller.firstElementChild;
+  const gap =
+    row instanceof HTMLElement
+      ? Number.parseFloat(window.getComputedStyle(row).gap) || 24
+      : 24;
+  return card.offsetWidth + gap;
+}
+
+function getScrollPage(scroller: HTMLDivElement): number {
+  const step = getCardStep(scroller);
+  if (step <= 0) return scroller.clientWidth;
+
+  const visibleCards = Math.max(1, Math.floor(scroller.clientWidth / step));
+  return step * Math.max(2, visibleCards);
+}
+
 function getActiveCardIndex(
-  row: HTMLDivElement | null,
+  scroller: HTMLDivElement | null,
   cardCount: number,
 ): number {
-  if (!row || cardCount <= 1) return 0;
+  if (!scroller || cardCount <= 1) return 0;
 
-  const maxScroll = row.scrollWidth - row.clientWidth;
-  if (maxScroll <= 0) return 0;
+  const maxScroll = getMaxScroll(scroller);
+  if (scroller.scrollLeft <= SCROLL_EDGE_PX) return 0;
+  if (maxScroll > 0 && scroller.scrollLeft >= maxScroll - SCROLL_EDGE_PX) {
+    return cardCount - 1;
+  }
 
-  if (row.scrollLeft <= SCROLL_EDGE_PX) return 0;
-  if (row.scrollLeft >= maxScroll - SCROLL_EDGE_PX) return cardCount - 1;
-
-  const rowRect = row.getBoundingClientRect();
-  const rowCenter = rowRect.left + rowRect.width / 2;
+  const viewport = scroller.getBoundingClientRect();
+  const viewportCenter = viewport.left + viewport.width / 2;
   let closestIndex = 0;
   let closestDistance = Number.POSITIVE_INFINITY;
 
-  Array.from(row.children).forEach((child, index) => {
-    if (!(child instanceof HTMLElement)) return;
+  getCardElements(scroller).forEach((child, index) => {
     const childRect = child.getBoundingClientRect();
     const childCenter = childRect.left + childRect.width / 2;
-    const distance = Math.abs(childCenter - rowCenter);
+    const distance = Math.abs(childCenter - viewportCenter);
     if (distance < closestDistance) {
       closestDistance = distance;
       closestIndex = index;
@@ -116,7 +152,41 @@ export function GeneralAgentSelectionPage({
 }) {
   const cards = getAgentCardsForFocus(focusId);
   const resolvedFocusLabel = focusLabel ?? getFocusLabel(focusId);
+  const cardRowRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(cards.length > 1);
+
+  const updateScrollState = useCallback(
+    (scroller: HTMLDivElement) => {
+      const nextIndex = getActiveCardIndex(scroller, cards.length);
+      const maxScroll = getMaxScroll(scroller);
+
+      setActiveIndex((prev) => (prev === nextIndex ? prev : nextIndex));
+      setCanScrollLeft(scroller.scrollLeft > SCROLL_EDGE_PX);
+      setCanScrollRight(scroller.scrollLeft < maxScroll - SCROLL_EDGE_PX);
+    },
+    [cards.length],
+  );
+
+  useEffect(() => {
+    const scroller = cardRowRef.current;
+    if (!scroller) return;
+
+    const measure = () => updateScrollState(scroller);
+    measure();
+    const frame = window.requestAnimationFrame(measure);
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(scroller);
+    const row = scroller.firstElementChild;
+    if (row instanceof HTMLElement) observer.observe(row);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [updateScrollState]);
 
   const handleCardSelect = (card: GeneralAgentCard) => {
     if (card.flowId) {
@@ -125,9 +195,24 @@ export function GeneralAgentSelectionPage({
   };
 
   const handleCardRowScroll = (event: UIEvent<HTMLDivElement>) => {
-    const row = event.currentTarget;
-    const nextIndex = getActiveCardIndex(row, cards.length);
-    setActiveIndex((prev) => (prev === nextIndex ? prev : nextIndex));
+    updateScrollState(event.currentTarget);
+  };
+
+  const scrollByCard = (direction: -1 | 1) => {
+    const scroller = cardRowRef.current;
+    if (!scroller) return;
+
+    const maxScroll = getMaxScroll(scroller);
+    if (maxScroll <= 0) return;
+
+    const page = getScrollPage(scroller);
+    const nextLeft = Math.max(
+      0,
+      Math.min(maxScroll, scroller.scrollLeft + direction * page),
+    );
+    if (Math.abs(nextLeft - scroller.scrollLeft) < 1) return;
+
+    scroller.scrollTo({ left: nextLeft, behavior: "smooth" });
   };
 
   return (
@@ -149,27 +234,53 @@ export function GeneralAgentSelectionPage({
           <p className={styles.subtitle}>Pick one to start. Add more later.</p>
         </div>
 
-        <div className={styles.cardRow} onScroll={handleCardRowScroll}>
-          {cards.map((card) => (
-            <AgentSelectionCard
-              key={card.id}
-              card={card}
-              onSelect={handleCardSelect}
-            />
-          ))}
+        <div
+          ref={cardRowRef}
+          className={styles.cardScroller}
+          onScroll={handleCardRowScroll}
+        >
+          <div className={styles.cardRow}>
+            {cards.map((card) => (
+              <AgentSelectionCard
+                key={card.id}
+                card={card}
+                onSelect={handleCardSelect}
+              />
+            ))}
+          </div>
         </div>
 
-        <div className={styles.dots} aria-hidden="true">
-          {cards.map((card, index) => (
-            <span
-              key={card.id}
-              className={
-                index === activeIndex
-                  ? `${styles.dot} ${styles.dotActive}`
-                  : styles.dot
-              }
-            />
-          ))}
+        <div className={styles.carouselNav}>
+          <IconButton
+            className={styles.carouselButton}
+            icon={DropdownChevronLeft}
+            kind="tertiary"
+            size="small"
+            aria-label="Previous agents"
+            disabled={!canScrollLeft}
+            onClick={() => scrollByCard(-1)}
+          />
+          <div className={styles.dots} aria-hidden="true">
+            {cards.map((card, index) => (
+              <span
+                key={card.id}
+                className={
+                  index === activeIndex
+                    ? `${styles.dot} ${styles.dotActive}`
+                    : styles.dot
+                }
+              />
+            ))}
+          </div>
+          <IconButton
+            className={styles.carouselButton}
+            icon={DropdownChevronRight}
+            kind="tertiary"
+            size="small"
+            aria-label="Next agents"
+            disabled={!canScrollRight}
+            onClick={() => scrollByCard(1)}
+          />
         </div>
 
         <div className={styles.galleryPrompt}>

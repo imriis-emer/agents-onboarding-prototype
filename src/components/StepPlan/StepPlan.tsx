@@ -32,12 +32,7 @@ export function StepPlan({ summary, steps }: StepPlanProps) {
   }, [steps]);
 
   return (
-    <Flex
-      direction="column"
-      align="start"
-      gap="medium"
-      className={styles.root}
-    >
+    <Flex direction="column" align="start" gap="medium" className={styles.root}>
       <Heading type="h2">My plan</Heading>
       <Flex direction="column" align="start" className={styles.markdown}>
         <Text element="p" className={styles.summary}>

@@ -1,3 +1,5 @@
+import { LIAM_WIDE_POSTER_URL, LIAM_WIDE_VIDEO_URL } from "./agentTemplates";
+
 const posterFrom = (videoUrl: string) => videoUrl.replace(/\.mp4$/, ".jpg");
 
 const DAN_MANUAL_MUTE_VIDEO =
@@ -32,6 +34,36 @@ export interface GeneralAgentCard {
   flowId?: "lia" | "jade";
 }
 
+export const GENERAL_DEFAULT_FOCUS_ID = "marketing";
+export const GENERAL_OTHER_FOCUS_ID = "other";
+export const GENERAL_PROJECTS_FOCUS_ID = "projects";
+
+const AGENT_CARD_BACKGROUND = "#FFB691";
+
+/** Liam — Project Manager from the Agents discover gallery. */
+export const PROJECTS_LIAM_CARD: GeneralAgentCard = {
+  id: "liam-pm",
+  agentName: "Liam",
+  title: "Project Manager",
+  description:
+    "Captures goals and scope for a clear, successful project from start to finish.",
+  tags: [],
+  bg: AGENT_CARD_BACKGROUND,
+  video: LIAM_WIDE_VIDEO_URL,
+  poster: LIAM_WIDE_POSTER_URL,
+  flowId: "lia",
+};
+
+export function skipsGeneralAgentSelection(focusId: string): boolean {
+  return (
+    focusId === GENERAL_OTHER_FOCUS_ID || focusId === GENERAL_PROJECTS_FOCUS_ID
+  );
+}
+
+export function startsProjectsAgentChat(focusId: string): boolean {
+  return focusId === GENERAL_PROJECTS_FOCUS_ID;
+}
+
 export const GENERAL_FOCUS_OPTIONS: readonly GeneralFocusOption[] = [
   {
     id: "projects",
@@ -59,15 +91,11 @@ export const GENERAL_FOCUS_OPTIONS: readonly GeneralFocusOption[] = [
     description: "Workflows, focus, personal efficiency",
   },
   {
-    id: "other",
+    id: GENERAL_OTHER_FOCUS_ID,
     title: "Other",
     description: "I'll figure it out as I go",
   },
 ] as const;
-
-export const GENERAL_DEFAULT_FOCUS_ID = "marketing";
-
-const AGENT_CARD_BACKGROUND = "#FFB691";
 
 const LIA_AGENT_CARD: GeneralAgentCard = {
   id: "lia",

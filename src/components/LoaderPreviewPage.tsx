@@ -29,7 +29,12 @@ export function LoaderPreviewPage({ onBack }: { onBack: () => void }) {
               <p className={styles.panelMeta}>Post-signup</p>
             </div>
             <div className={styles.panelLoader}>
-              <RecruitingLoadingScreen preview compact large variant="account" />
+              <RecruitingLoadingScreen
+                preview
+                compact
+                large
+                variant="account"
+              />
             </div>
           </section>
 

@@ -58,7 +58,9 @@ export function RecruitingLandingPage({
       <section className={styles.hero}>
         <h1 className={styles.heroTitle}>
           {flow.landing.heroTitleLine1}
-          <span className={styles.gradientLine}>{flow.landing.heroTitleLine2}</span>
+          <span className={styles.gradientLine}>
+            {flow.landing.heroTitleLine2}
+          </span>
         </h1>
         <p className={styles.heroSubtitle}>{flow.landing.heroSubtitle}</p>
         <div className={styles.heroCta}>
@@ -73,7 +75,9 @@ export function RecruitingLandingPage({
       </section>
 
       <section className={styles.trust}>
-        <p className={styles.trustLabel}>Trusted by 250,000+ customers worldwide</p>
+        <p className={styles.trustLabel}>
+          Trusted by 250,000+ customers worldwide
+        </p>
         <div className={styles.logoRow}>
           {TRUST_LOGOS.map((logo) => (
             <span key={logo} className={styles.logoRowItem}>
@@ -101,7 +105,9 @@ export function RecruitingLandingPage({
                 <div className={styles.pipelineHeader}>
                   {flow.landing.pipelineHeader}
                 </div>
-                <div className={styles.pipelineGroup}>{flow.landing.pipelineGroup}</div>
+                <div className={styles.pipelineGroup}>
+                  {flow.landing.pipelineGroup}
+                </div>
                 <table className={styles.pipelineTable}>
                   <thead>
                     <tr>

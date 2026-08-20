@@ -39,7 +39,9 @@ function getDismissedBannerStorageKey(tone: ProductContextBannerTone) {
 
 function readDismissedBannerState(tone: ProductContextBannerTone) {
   try {
-    return sessionStorage.getItem(getDismissedBannerStorageKey(tone)) === "true";
+    return (
+      sessionStorage.getItem(getDismissedBannerStorageKey(tone)) === "true"
+    );
   } catch {
     return false;
   }

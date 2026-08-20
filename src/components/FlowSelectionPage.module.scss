@@ -87,7 +87,9 @@
 
 .cardSelected {
   border-color: #0073ea;
-  box-shadow: 0 0 0 1px #0073ea, 0 8px 24px rgb(0 115 234 / 12%);
+  box-shadow:
+    0 0 0 1px #0073ea,
+    0 8px 24px rgb(0 115 234 / 12%);
 }
 
 .cardMedia {
