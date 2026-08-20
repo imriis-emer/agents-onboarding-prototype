@@ -49,7 +49,9 @@ export function GeneralFocusQuestionPage({
           isExiting ? styles.contentExit : ""
         }`}
       >
-        <h1 className={styles.title}>What&apos;s your main focus?</h1>
+        <h1 className={styles.title}>
+          What kind of work should we hand your agent?
+        </h1>
         <p className={styles.subtitle}>You can always add more in the future</p>
       </div>
 
