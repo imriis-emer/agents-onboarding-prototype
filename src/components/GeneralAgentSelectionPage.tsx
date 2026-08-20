@@ -6,7 +6,6 @@ import {
 } from "@mondaydotcomorg/icons";
 import {
   getAgentCardsForFocus,
-  getFocusLabel,
   type GeneralAgentCard,
 } from "../data/generalOnboardingData";
 import type { AgentFlowId } from "../data/agentFlows";
@@ -139,7 +138,6 @@ function AgentSelectionCard({
 
 export function GeneralAgentSelectionPage({
   focusId,
-  focusLabel,
   onSelectAgent,
   onBack,
   embedded = false,
@@ -151,7 +149,6 @@ export function GeneralAgentSelectionPage({
   embedded?: boolean;
 }) {
   const cards = getAgentCardsForFocus(focusId);
-  const resolvedFocusLabel = focusLabel ?? getFocusLabel(focusId);
   const cardRowRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -230,7 +227,7 @@ export function GeneralAgentSelectionPage({
         )}
 
         <div className={styles.headingBlock}>
-          <h1 className={styles.title}>Select a {resolvedFocusLabel} agent</h1>
+          <h1 className={styles.title}>Choose your first team member</h1>
           <p className={styles.subtitle}>Pick one to start. Add more later.</p>
         </div>
 
