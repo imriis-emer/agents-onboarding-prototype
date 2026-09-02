@@ -45,7 +45,7 @@
 
 .cardsSection {
   width: 100%;
-  overflow: auto;
+  overflow: visible;
   max-height: none;
   opacity: 1;
   transform: translateY(0);
@@ -59,6 +59,7 @@
 .cardsSectionHidden {
   max-height: 0;
   margin-top: 0;
+  overflow: hidden;
   opacity: 0;
   transform: translateY(-10px);
   pointer-events: none;
@@ -84,7 +85,14 @@
   cursor: pointer;
   transition:
     border-color 160ms ease,
-    background-color 160ms ease;
+    background-color 160ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgb(20 18 60 / 10%);
+  }
 }
 
 .focusCardSelected {

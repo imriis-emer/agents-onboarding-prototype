@@ -85,10 +85,14 @@ export const GENERAL_FOCUS_OPTIONS: readonly GeneralFocusOption[] = [
     description: "Requests, assets, incidents",
   },
   {
+    id: "construction",
+    title: "Construction",
+    description: "Jobsites, bids, punch lists",
+  },
+  {
     id: GENERAL_SCRATCH_FOCUS_ID,
     title: "Other",
     description: "",
-    fullWidth: true,
   },
 ];
 
