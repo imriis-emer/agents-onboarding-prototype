@@ -8,6 +8,7 @@ import { RecruitingLandingPage } from "./components/RecruitingLandingPage";
 import { GeneralLandingPage } from "./components/GeneralLandingPage";
 import { GeneralAgentsSetupFlow } from "./components/GeneralAgentsSetupFlow";
 import { RecruitingSignupPage } from "./components/RecruitingSignupPage";
+import { GeneralAccountFormPage } from "./components/GeneralAccountFormPage";
 import { RecruitingLoadingScreen } from "./components/RecruitingLoadingScreen";
 import { FlowAgentSelectionSetup } from "./components/FlowAgentSelectionSetup";
 import { FlowSelectionPage } from "./components/FlowSelectionPage";
@@ -26,7 +27,7 @@ import {
   useWorkspaceBoards,
 } from "./context/WorkspaceBoardsContext";
 import { getAgentFlow, type AgentFlowId } from "./data/agentFlows";
-import { LIAM_POSTER_URL } from "./data/agentTemplates";
+import { PACKAGED_SOLUTION_LOADING_MESSAGES } from "./utils/agentLoaderAnimation";
 import type { FlowAgentSelectionCard } from "./data/flowAgentSelectionData";
 import {
   getEntryPrototypeStepCount,
@@ -34,12 +35,17 @@ import {
 } from "./data/agentsOnboardingPrototypeSteps";
 import {
   GENERAL_DEFAULT_FOCUS_ID,
-  GENERAL_OTHER_FOCUS_ID,
-  PROJECTS_LIAM_CARD,
-  skipsGeneralAgentSelection,
-  startsProjectsAgentChat,
-  type GeneralAgentCard,
+  HR_SOLUTION_CARDS,
+  skipsGeneralSolutionSelection,
+  type GeneralSolutionCard,
 } from "./data/generalOnboardingData";
+import maxAvatar from "./assets/agents-onboarding/flow-selection/hr-resume-screening-a-cutout.png";
+import * as jadeScanFlow from "./data/nikeScanFlow";
+import {
+  HR_PIPELINE_BOARD_GROUPS,
+  HR_PIPELINE_BOARD_TITLE,
+  rewriteCandidatesBoardName,
+} from "./data/packagedHrBoard";
 import { initProduct, type ConfigProductName } from "./productConfig";
 import { ThemeSwitcher } from "./components/ThemeSwitcher";
 import { AgentsViewProvider } from "./context/AgentsViewContext";
@@ -128,7 +134,7 @@ function AppInner() {
     const flow = new URLSearchParams(window.location.search).get("flow");
     return flow === "lia" || flow === "jade" || flow === "general"
       ? flow
-      : "jade";
+      : "general";
   });
   const [selectedFlowAgent, setSelectedFlowAgent] =
     useState<AgentFlowOverride | null>(null);
@@ -166,17 +172,17 @@ function AppInner() {
   const [generalFocusLabel, setGeneralFocusLabel] = useState<string | null>(
     null,
   );
+  const [startInBoardChat, setStartInBoardChat] = useState(false);
 
   const prototypeSteps = getPrototypeSteps(selectedFlowId);
   const entryStepCount = getEntryPrototypeStepCount(selectedFlowId);
   const agentSelectionStepIndex = 3;
   const accountCreatingStepIndex = 4;
   const loadingStepIndex = 5;
-  const generalAgentSelectionStepIndex = 4;
-  const isGeneralInProductLanding =
-    selectedFlowId === "general" &&
-    prototypeStepIndex === generalAgentSelectionStepIndex &&
-    generalFocusId === GENERAL_OTHER_FOCUS_ID;
+  const generalAccountFormStepIndex = 2;
+  const generalFocusStepIndex = 3;
+  const generalSolutionStepIndex = 4;
+  const isGeneralInProductLanding = false;
   const isGeneralOtherGallery = isGeneralInProductLanding;
 
   const goToPrototypeStep = useCallback(
@@ -203,46 +209,71 @@ function AppInner() {
   );
 
   const buildGeneralAgentOverride = useCallback(
-    (card: GeneralAgentCard): AgentFlowOverride => {
-      const role = card.title.toLowerCase();
-      const isRubyAdCreative =
-        card.agentName === "Ruby" && /ad creative/i.test(card.title);
-      const isLiamPm =
-        card.agentName === "Liam" && /project manager/i.test(card.title);
+    (card: GeneralSolutionCard): AgentFlowOverride => {
+      const greeting = `Hi Alex 👋 I'm ${card.agentName} — your new recruiting teammate.`;
 
       return {
         agentName: card.agentName,
-        agentRole: card.title,
-        heroGreeting: `Hi Ohad 👋 I'm ${card.agentName} — your new ${role}.`,
-        videoPlayingCopy: `I'm ${card.agentName}, your new ${role}. ${card.description}`,
+        agentRole: card.agentRole,
+        preferMiniChat: true,
+        heroGreeting: greeting,
+        assets: {
+          avatar: maxAvatar,
+          portrait: maxAvatar,
+          agentFull: maxAvatar,
+        },
         onboardingScript: [
           {
+            id: "packaged-hello",
+            text: greeting,
+          },
+          {
             id: "m1",
-            text: isRubyAdCreative
-              ? "I'll read your campaign brief, product, and target audience, generate ad concepts with paired copy and visuals."
-              : isLiamPm
-                ? "I'll capture your goals and scope so every project starts clear and finishes strong."
-                : card.description,
+            text: `I handle the sourcing legwork so you can focus on the candidates that matter. We'll work together on your ${HR_PIPELINE_BOARD_TITLE} board.`,
           },
           {
             id: "m2",
-            text: "I act when you ask, everything I do is visible and reversible, and you can redirect me at any time.",
+            text: "Every hire stays yours. I act when you ask, everything I do is visible and reversible, and you can redirect me at any time.",
           },
         ],
-        ...(isRubyAdCreative ? rubyAdCreativeNextSteps() : {}),
-        ...(isLiamPm ? liamProjectManagerNextSteps() : {}),
-        ...(isLiamPm
-          ? {
-              assets: {
-                heroIntro: card.poster,
-                heroPoster: card.poster,
-                avatar: LIAM_POSTER_URL,
-                portrait: LIAM_POSTER_URL,
-                agentFull: LIAM_POSTER_URL,
-                videoSrc: card.video,
-              },
-            }
-          : {}),
+        boardLabels: {
+          mainBoard: HR_PIPELINE_BOARD_TITLE,
+          focusBoard: HR_PIPELINE_BOARD_TITLE,
+          resultsTitle: HR_PIPELINE_BOARD_TITLE,
+          resultsGroupTitle: "Schedule interviews",
+          composerPlaceholder: `Message ${card.agentName}...`,
+        },
+        boardHandoff: {
+          saveMessage: rewriteCandidatesBoardName(
+            jadeScanFlow.BOARD_SAVE_MESSAGE,
+          ),
+          offerOptions: jadeScanFlow.BOARD_OFFER_OPTIONS.map((option) =>
+            rewriteCandidatesBoardName(option),
+          ),
+          offerPositive: rewriteCandidatesBoardName(
+            jadeScanFlow.BOARD_OFFER_POSITIVE,
+          ),
+          tourSteps: jadeScanFlow.BOARD_TOUR_STEPS.map((step) => ({
+            ...step,
+            text: rewriteCandidatesBoardName(step.text),
+          })),
+        },
+        scanFlow: {
+          boardTableGroups: HR_PIPELINE_BOARD_GROUPS,
+          script: jadeScanFlow.NIKE_SCAN_SCRIPT.map((message) => ({
+            ...message,
+            text: rewriteCandidatesBoardName(message.text),
+          })),
+          dailyTriggerJob: {
+            ...jadeScanFlow.DAILY_TRIGGER_JOB,
+            description: rewriteCandidatesBoardName(
+              jadeScanFlow.DAILY_TRIGGER_JOB.description,
+            ),
+          },
+        },
+        loading: {
+          messages: PACKAGED_SOLUTION_LOADING_MESSAGES,
+        },
       };
     },
     [],
@@ -322,8 +353,9 @@ function AppInner() {
   // loading step. The loading screen auto-advances to that flow's hero step on
   // completion. Bumping the session key remounts AgentsOnboardingView fresh.
   const handleGeneralAgentSelect = useCallback(
-    (flowId: AgentFlowId, card: GeneralAgentCard) => {
+    (flowId: AgentFlowId, card: GeneralSolutionCard) => {
       resetWorkspaceSession();
+      setStartInBoardChat(true);
       setSelectedFlowAgent(buildGeneralAgentOverride(card));
       setSelectedFlowId(flowId);
       setPrototypeStepIndex(getEntryPrototypeStepCount(flowId) - 1);
@@ -341,7 +373,8 @@ function AppInner() {
     resetWorkspaceSession();
     setOnboardingSessionKey((key) => key + 1);
     setSelectedFlowAgent(null);
-    setSelectedFlowId("jade");
+    setStartInBoardChat(false);
+    setSelectedFlowId("general");
     setPrototypeStepIndex(0);
     commitHashRoute({
       railItem: "workspace",
@@ -533,13 +566,7 @@ function AppInner() {
           : (prototypeSteps[prototypeStepIndex]?.label ?? "")
       }
       totalSteps={prototypeSteps.length}
-      stepLabels={prototypeSteps.map((step) =>
-        selectedFlowId === "general" &&
-        step.id === "agent-selection" &&
-        generalFocusId === GENERAL_OTHER_FOCUS_ID
-          ? "Agents gallery"
-          : step.label,
-      )}
+      stepLabels={prototypeSteps.map((step) => step.label)}
       onPrevious={() => goToPrototypeStep(prototypeStepIndex - 1)}
       onNext={() => goToPrototypeStep(prototypeStepIndex + 1)}
       onSelectStep={goToPrototypeStep}
@@ -580,6 +607,7 @@ function AppInner() {
       <AgentsOnboardingView
         key={`${selectedFlowId}-${selectedFlowAgent?.agentName ?? "default"}-${onboardingSessionKey}`}
         prototypeStepIndex={prototypeStepIndex}
+        startInBoardChat={startInBoardChat}
       />
     </WorkspaceRouter>
   );
@@ -589,14 +617,14 @@ function AppInner() {
       return <LoaderPreviewPage onBack={() => setLoaderPreviewOpen(false)} />;
     }
 
-    if (prototypeStepIndex === 0) {
+    if (prototypeStepIndex === 0 && selectedFlowId !== "general") {
       return (
         <FlowSelectionPage
           selectedFlowId={selectedFlowId}
           onSelectFlow={(flowId) => {
             setSelectedFlowAgent(null);
             setSelectedFlowId(flowId);
-            setPrototypeStepIndex(1);
+            setPrototypeStepIndex(flowId === "general" ? 0 : 1);
             commitHashRoute({
               railItem: "workspace",
               agentsView: "home",
@@ -608,22 +636,30 @@ function AppInner() {
       );
     }
 
-    if (prototypeStepIndex === 1) {
+    if (
+      (prototypeStepIndex === 0 && selectedFlowId === "general") ||
+      (prototypeStepIndex === 1 && selectedFlowId !== "general")
+    ) {
       if (selectedFlowId === "general") {
-        return <GeneralLandingPage onGetStarted={() => goToPrototypeStep(2)} />;
+        return <GeneralLandingPage onGetStarted={() => goToPrototypeStep(1)} />;
       }
       return (
         <RecruitingLandingPage onGetStarted={() => goToPrototypeStep(2)} />
       );
     }
 
-    if (prototypeStepIndex === 2) {
+    if (
+      (prototypeStepIndex === 1 && selectedFlowId === "general") ||
+      (prototypeStepIndex === 2 && selectedFlowId !== "general")
+    ) {
       return (
         <RecruitingSignupPage
           isGeneralFlow={selectedFlowId === "general"}
           onContinue={() =>
             goToPrototypeStep(
-              selectedFlowId === "general" ? 3 : agentSelectionStepIndex,
+              selectedFlowId === "general"
+                ? generalAccountFormStepIndex
+                : agentSelectionStepIndex,
             )
           }
         />
@@ -657,35 +693,40 @@ function AppInner() {
     }
 
     if (
-      (prototypeStepIndex === 3 || prototypeStepIndex === 4) &&
-      selectedFlowId === "general" &&
-      !isGeneralInProductLanding
+      prototypeStepIndex === generalAccountFormStepIndex &&
+      selectedFlowId === "general"
+    ) {
+      return (
+        <GeneralAccountFormPage
+          onBack={() => goToPrototypeStep(1)}
+          onContinue={() => goToPrototypeStep(generalFocusStepIndex)}
+        />
+      );
+    }
+
+    if (
+      (prototypeStepIndex === generalFocusStepIndex ||
+        prototypeStepIndex === generalSolutionStepIndex) &&
+      selectedFlowId === "general"
     ) {
       return (
         <GeneralAgentsSetupFlow
-          initialPhase={prototypeStepIndex === 3 ? "focus" : "selection"}
+          initialPhase={
+            prototypeStepIndex === generalFocusStepIndex ? "focus" : "selection"
+          }
           focusId={generalFocusId}
           focusLabel={generalFocusLabel ?? undefined}
-          onBack={() => goToPrototypeStep(2)}
-          onBackToFocus={() => goToPrototypeStep(3)}
+          onBack={() => goToPrototypeStep(generalAccountFormStepIndex)}
+          onBackToFocus={() => goToPrototypeStep(generalFocusStepIndex)}
           onFocusComplete={(focusId, customLabel) => {
             setGeneralFocusId(focusId);
             setGeneralFocusLabel(customLabel ?? null);
-            if (startsProjectsAgentChat(focusId)) {
-              handleGeneralAgentSelect(
-                PROJECTS_LIAM_CARD.flowId ?? "lia",
-                PROJECTS_LIAM_CARD,
-              );
+            if (skipsGeneralSolutionSelection(focusId)) {
+              const fallback = HR_SOLUTION_CARDS[1] ?? HR_SOLUTION_CARDS[0];
+              handleGeneralAgentSelect(fallback.flowId, fallback);
               return;
             }
-            if (skipsGeneralAgentSelection(focusId)) {
-              commitHashRoute({
-                railItem: "agents",
-                agentsView: "home",
-                sidekickChatId: null,
-              });
-            }
-            goToPrototypeStep(4);
+            goToPrototypeStep(generalSolutionStepIndex);
           }}
           onSelectAgent={handleGeneralAgentSelect}
         />
@@ -698,8 +739,13 @@ function AppInner() {
     ) {
       return (
         <RecruitingLoadingScreen
+          variant="agent"
           autoCompleteAfterMs={6000}
-          onComplete={() => goToPrototypeStep(entryStepCount)}
+          onComplete={() =>
+            goToPrototypeStep(
+              startInBoardChat ? entryStepCount + 2 : entryStepCount,
+            )
+          }
         />
       );
     }

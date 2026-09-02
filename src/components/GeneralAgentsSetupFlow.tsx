@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { GeneralFocusQuestionPage } from "./GeneralFocusQuestionPage";
 import { GeneralAgentSelectionPage } from "./GeneralAgentSelectionPage";
-import generalSignupVisual from "../assets/agents-onboarding/general-signup-visual.png";
 import mondayLoaderGif from "../assets/recruiting-onboarding/monday-loader.gif";
 import type { AgentFlowId } from "../data/agentFlows";
 import styles from "./GeneralAgentsSetupFlow.module.scss";
 import {
-  skipsGeneralAgentSelection,
-  type GeneralAgentCard,
+  HR_SOLUTION_CARDS,
+  getFocusVisualSrc,
+  skipsGeneralSolutionSelection,
+  type GeneralSolutionCard,
 } from "../data/generalOnboardingData";
 
 type FlowPhase = "focus" | "cards-exit" | "expanding" | "loading" | "selection";
@@ -31,12 +32,15 @@ export function GeneralAgentsSetupFlow({
   onBack: () => void;
   onBackToFocus: () => void;
   onFocusComplete: (focusId: string, customLabel?: string) => void;
-  onSelectAgent: (flowId: AgentFlowId, card: GeneralAgentCard) => void;
+  onSelectAgent: (flowId: AgentFlowId, card: GeneralSolutionCard) => void;
 }) {
   const [phase, setPhase] = useState<FlowPhase>(
     initialPhase === "selection" ? "selection" : "focus",
   );
   const [activeFocusId, setActiveFocusId] = useState(focusId);
+  const [previewFocusId, setPreviewFocusId] = useState(
+    initialPhase === "selection" ? focusId : "",
+  );
   const [activeFocusLabel, setActiveFocusLabel] = useState<string | undefined>(
     focusLabel,
   );
@@ -65,6 +69,7 @@ export function GeneralAgentsSetupFlow({
 
   const handleFocusContinue = (nextFocusId: string, customLabel?: string) => {
     setActiveFocusId(nextFocusId);
+    setPreviewFocusId(nextFocusId);
     setActiveFocusLabel(customLabel);
     setPhase("cards-exit");
 
@@ -73,7 +78,7 @@ export function GeneralAgentsSetupFlow({
     schedule(
       () => {
         onFocusComplete(nextFocusId, customLabel);
-        if (!skipsGeneralAgentSelection(nextFocusId)) {
+        if (!skipsGeneralSolutionSelection(nextFocusId)) {
           setPhase("selection");
         }
       },
@@ -90,6 +95,8 @@ export function GeneralAgentsSetupFlow({
     phase === "expanding" || phase === "loading" || phase === "selection";
   const showLoader = phase === "loading";
   const showSelection = phase === "selection";
+  const useHrPanel = isPanelExpanded;
+  const focusVisualSrc = getFocusVisualSrc(previewFocusId);
 
   return (
     <div
@@ -103,6 +110,8 @@ export function GeneralAgentsSetupFlow({
             embedded
             hideCards={hideCards}
             hideFooter={hideFooter}
+            initialFocusId={previewFocusId}
+            onFocusChange={setPreviewFocusId}
             onBack={onBack}
             onContinue={handleFocusContinue}
           />
@@ -112,12 +121,15 @@ export function GeneralAgentsSetupFlow({
       <div
         className={`${styles.bluePanel} ${
           isPanelExpanded ? styles.bluePanelExpanded : ""
-        } ${showSelection ? styles.bluePanelSelection : ""}`}
+        } ${showSelection ? styles.bluePanelSelection : ""} ${
+          useHrPanel ? styles.bluePanelHr : ""
+        }`}
       >
         {!hideVisual && (
           <img
+            key={focusVisualSrc}
             className={styles.visualImage}
-            src={generalSignupVisual}
+            src={focusVisualSrc}
             alt=""
             aria-hidden="true"
           />
@@ -141,6 +153,10 @@ export function GeneralAgentsSetupFlow({
             focusLabel={activeFocusLabel}
             onSelectAgent={onSelectAgent}
             onBack={handleBackToFocus}
+            onStartFromScratch={() => {
+              const fallback = HR_SOLUTION_CARDS[1] ?? HR_SOLUTION_CARDS[0];
+              onSelectAgent(fallback.flowId, fallback);
+            }}
           />
         )}
       </div>

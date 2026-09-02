@@ -88,6 +88,10 @@ import {
   getPrototypeStepState,
 } from "../data/agentsOnboardingPrototypeSteps";
 import type { AgentFlowScriptMessage } from "../data/agentFlows";
+import {
+  buildPackagedBoardUpdateMessage,
+  PACKAGED_APPROVED_CANDIDATES,
+} from "../data/packagedHrBoard";
 import styles from "./AgentsOnboardingView.module.scss";
 
 /** Stable fallback — `?? []` would allocate every render and reset the convo. */
@@ -2040,12 +2044,15 @@ function AgentSidePanel({
 
 interface AgentsOnboardingViewProps {
   prototypeStepIndex: number;
+  startInBoardChat?: boolean;
 }
 
 export function AgentsOnboardingView({
   prototypeStepIndex,
+  startInBoardChat = false,
 }: AgentsOnboardingViewProps) {
   const agentFlow = useAgentFlow();
+  const openOnBoard = startInBoardChat || Boolean(agentFlow.preferMiniChat);
   const boardTourSteps = agentFlow.boardHandoff.tourSteps;
   const boardChatIntroMessages =
     agentFlow.boardHandoff.chatIntroMessages ?? EMPTY_BOARD_CHAT_INTRO_MESSAGES;
@@ -2063,13 +2070,15 @@ export function AgentsOnboardingView({
     setWorkspaceEntryMode,
     liveBoardReady,
     registerFocusBoardActivate,
+    appendBoardRow,
+    clearAppendedBoardRows,
   } = useWorkspaceBoards();
   const onboardingScript = agentFlow.onboardingScript;
   const sourcingScript = agentFlow.sourcingScript;
 
   const [message, setMessage] = useState("");
   const [composerMessages, setComposerMessages] = useState<string[]>([]);
-  const [conversationStarted, setConversationStarted] = useState(false);
+  const [conversationStarted, setConversationStarted] = useState(openOnBoard);
   const [completedMessages, setCompletedMessages] = useState<ScriptMessage[]>(
     [],
   );
@@ -2135,6 +2144,10 @@ export function AgentsOnboardingView({
   const [refinedTableVisible, setRefinedTableVisible] = useState(false);
   const [feedbackAsk2Visible, setFeedbackAsk2Visible] = useState(false);
   const [feedbackChoice2, setFeedbackChoice2] = useState<string | null>(null);
+  const [packagedBoardUpdateTyping, setPackagedBoardUpdateTyping] =
+    useState(false);
+  const [packagedBoardUpdateMessage, setPackagedBoardUpdateMessage] =
+    useState<ScriptMessage | null>(null);
   const [showFeedbackCard, setShowFeedbackCard] = useState(false);
   const [feedbackCardRound, setFeedbackCardRound] = useState<1 | 2>(1);
   const [boardSaveVisible, setBoardSaveVisible] = useState(false);
@@ -2148,9 +2161,9 @@ export function AgentsOnboardingView({
   const [showBoardOfferCard, setShowBoardOfferCard] = useState(false);
   const [boardOfferChoice, setBoardOfferChoice] = useState<string | null>(null);
   const [showBoardHandoffTooltip, setShowBoardHandoffTooltip] = useState(false);
-  const [showBoardView, setShowBoardView] = useState(false);
+  const [showBoardView, setShowBoardView] = useState(openOnBoard);
   const [boardLoading, setBoardLoading] = useState(false);
-  const [boardChatRevealed, setBoardChatRevealed] = useState(false);
+  const [boardChatRevealed, setBoardChatRevealed] = useState(openOnBoard);
   const [boardChatIntroCompleted, setBoardChatIntroCompleted] = useState<
     ScriptMessage[]
   >([]);
@@ -2297,14 +2310,18 @@ export function AgentsOnboardingView({
 
   // Tell the layout when the live board stage is showing so the nav rail can
   // highlight "Workspace" (instead of "Agents") while the board is open.
-  useEffect(() => {
+  useLayoutEffect(() => {
     setBoardStageActive(showBoardView);
-  }, [showBoardView, setBoardStageActive]);
+    if (showBoardView) {
+      setLiveBoardReady(true);
+    }
+  }, [showBoardView, setBoardStageActive, setLiveBoardReady]);
 
   useEffect(() => {
     if (showBoardView) {
       setLiveBoardReady(true);
       if (
+        !startInBoardChat &&
         !boardModeInitializedRef.current &&
         workspaceEntryMode === "conversation"
       ) {
@@ -2314,6 +2331,7 @@ export function AgentsOnboardingView({
     }
   }, [
     showBoardView,
+    startInBoardChat,
     setLiveBoardReady,
     workspaceEntryMode,
     setWorkspaceEntryMode,
@@ -2331,7 +2349,7 @@ export function AgentsOnboardingView({
     if (workspaceEntryMode === "board") {
       setShowBoardView(true);
       setBoardLoading(false);
-      setBoardChatRevealed(false);
+      setBoardChatRevealed(startInBoardChat);
       setBoardTourStep(null);
       setPanelForceOpen(true);
       setShowBoardHandoffTooltip(false);
@@ -2356,6 +2374,7 @@ export function AgentsOnboardingView({
   }, [
     workspaceEntryMode,
     liveBoardReady,
+    startInBoardChat,
     boardChatIntroMessages,
     setBoardHandoffActive,
     setPanelForceOpen,
@@ -2629,6 +2648,9 @@ export function AgentsOnboardingView({
     setRefinedTableVisible(false);
     setFeedbackAsk2Visible(false);
     setFeedbackChoice2(null);
+    setPackagedBoardUpdateTyping(false);
+    setPackagedBoardUpdateMessage(null);
+    clearAppendedBoardRows();
     setShowFeedbackCard(false);
     setFeedbackCardRound(1);
     setBoardSaveVisible(false);
@@ -2639,10 +2661,16 @@ export function AgentsOnboardingView({
     setBoardOfferChoice(null);
     setShowBoardHandoffTooltip(false);
     setBoardHandoffActive(false);
-    setPanelForceOpen(false);
-    setShowBoardView(false);
+    if (startInBoardChat || agentFlow.preferMiniChat) {
+      setPanelForceOpen(true);
+      setShowBoardView(true);
+      setBoardChatRevealed(true);
+    } else {
+      setPanelForceOpen(false);
+      setShowBoardView(false);
+      setBoardChatRevealed(false);
+    }
     setBoardLoading(false);
-    setBoardChatRevealed(false);
     setBoardTourStep(null);
     setBoardChatIntroCompleted([]);
     setBoardChatIntroActive(null);
@@ -2670,7 +2698,13 @@ export function AgentsOnboardingView({
     setPostSaveSelection(null);
     setLiaTourSkipMessage(null);
     setComposerMessages([]);
-  }, [setBoardHandoffActive, setPanelForceOpen]);
+  }, [
+    agentFlow.preferMiniChat,
+    clearAppendedBoardRows,
+    setBoardHandoffActive,
+    setPanelForceOpen,
+    startInBoardChat,
+  ]);
 
   const clearScheduledTimers = useCallback(() => {
     timersRef.current.forEach((id) => window.clearTimeout(id));
@@ -2724,11 +2758,29 @@ export function AgentsOnboardingView({
       setBoardSaveVisible(snapshot.boardSaveVisible);
       setShowBoardOfferCard(snapshot.showBoardOfferCard);
       setBoardOfferChoice(snapshot.boardOfferChoice);
-      setShowBoardView(snapshot.showBoardView);
-      if (snapshot.showBoardView) {
+      setPackagedBoardUpdateTyping(false);
+      setPackagedBoardUpdateMessage(null);
+      clearAppendedBoardRows();
+      const keepMiniBoardChat =
+        startInBoardChat || Boolean(agentFlow.preferMiniChat);
+      if (keepMiniBoardChat) {
+        setConversationStarted(true);
+        setCompletedMessages([]);
+        setActiveMessage(null);
+        setIsTyping(false);
+        setShowActionCard(false);
+        setFirstActionTitleVisible(false);
+        setUserSelection(null);
+        scriptIndexRef.current = 0;
+        introStartedRef.current = false;
+      }
+      setShowBoardView(keepMiniBoardChat ? true : snapshot.showBoardView);
+      if (snapshot.showBoardView || keepMiniBoardChat) {
         setLiveBoardReady(true);
       }
-      setBoardChatRevealed(snapshot.boardChatRevealed);
+      setBoardChatRevealed(
+        keepMiniBoardChat ? true : snapshot.boardChatRevealed,
+      );
       setBoardTourStep(snapshot.boardTourStep);
       if (snapshot.boardChatIntroDone) {
         setBoardChatIntroCompleted([...boardChatIntroMessages]);
@@ -2743,7 +2795,7 @@ export function AgentsOnboardingView({
         boardChatIntroIndexRef.current = 0;
         boardChatIntroStartedRef.current = false;
       }
-      setPanelForceOpen(snapshot.showBoardView);
+      setPanelForceOpen(keepMiniBoardChat ? true : snapshot.showBoardView);
       // Snapshots represent settled states — never mid-stream/mid-load — so the
       // board-save message renders statically and the handoff won't re-fire.
       setBoardSaveTyping(false);
@@ -2767,19 +2819,27 @@ export function AgentsOnboardingView({
       setPostSaveSelection(snapshot.postSaveSelection);
       setLiaTourSkipMessage(snapshot.liaTourSkipMessage);
 
-      scriptIndexRef.current = snapshot.refs.scriptIndex;
-      followUpIndexRef.current = snapshot.refs.followUpIndex;
-      flowIndexRef.current = snapshot.refs.flowIndex;
-      activeFlowRef.current = snapshot.refs.activeFlow;
-      introStartedRef.current = snapshot.refs.introStarted;
+      if (keepMiniBoardChat) {
+        scriptIndexRef.current = 0;
+        introStartedRef.current = false;
+      } else {
+        scriptIndexRef.current = snapshot.refs.scriptIndex;
+        followUpIndexRef.current = snapshot.refs.followUpIndex;
+        flowIndexRef.current = snapshot.refs.flowIndex;
+        activeFlowRef.current = snapshot.refs.activeFlow;
+        introStartedRef.current = snapshot.refs.introStarted;
+      }
 
       requestAnimationFrame(() => scrollToBottom("auto"));
     },
     [
       agentFlow.id,
+      agentFlow.preferMiniChat,
       boardChatIntroMessages,
+      clearAppendedBoardRows,
       clearScheduledTimers,
       scrollToBottom,
+      startInBoardChat,
     ],
   );
 
@@ -2790,6 +2850,22 @@ export function AgentsOnboardingView({
     if (prototypeStepIndex < ENTRY_PROTOTYPE_STEP_COUNT) return;
     applyPrototypeStepRef.current(prototypeStepIndex);
   }, [prototypeStepIndex]);
+
+  useEffect(() => {
+    if (!startInBoardChat) return;
+    if (prototypeStepIndex < ENTRY_PROTOTYPE_STEP_COUNT) return;
+    setShowBoardView(true);
+    setBoardChatRevealed(true);
+    setLiveBoardReady(true);
+    setPanelForceOpen(true);
+    setBoardTourStep(null);
+    setConversationStarted(true);
+  }, [
+    startInBoardChat,
+    prototypeStepIndex,
+    setLiveBoardReady,
+    setPanelForceOpen,
+  ]);
 
   useEffect(() => {
     setWorkspaceBoards(knowledgeBoards);
@@ -3608,6 +3684,30 @@ export function AgentsOnboardingView({
       else setFeedbackChoice2(option);
 
       if (option === CANDIDATE_FEEDBACK_POSITIVE) {
+        if (agentFlow.preferMiniChat) {
+          setPackagedBoardUpdateTyping(true);
+          const rowStaggerMs = 380;
+          PACKAGED_APPROVED_CANDIDATES.forEach((row, index) => {
+            schedule(() => appendBoardRow(row), rowStaggerMs * (index + 1));
+          });
+          const revealCopyAt =
+            rowStaggerMs * PACKAGED_APPROVED_CANDIDATES.length + 220;
+          schedule(() => {
+            setPackagedBoardUpdateTyping(false);
+            setPackagedBoardUpdateMessage({
+              id: "packaged-board-update",
+              text: buildPackagedBoardUpdateMessage(
+                agentFlow.boardLabels.mainBoard,
+              ),
+            });
+          }, revealCopyAt);
+          schedule(
+            () => showFlowTypingThenMessage(),
+            revealCopyAt + randomBetween(PAUSE_MIN_MS, PAUSE_MAX_MS),
+          );
+          return;
+        }
+
         // Pleased — resume the scripted flow at the automation ask (n6).
         schedule(
           () => showFlowTypingThenMessage(),
@@ -3635,7 +3735,13 @@ export function AgentsOnboardingView({
         randomBetween(SEARCH_ACTION_MIN_MS, SEARCH_ACTION_MAX_MS),
       );
     },
-    [schedule, showFlowTypingThenMessage],
+    [
+      agentFlow.boardLabels.mainBoard,
+      agentFlow.preferMiniChat,
+      appendBoardRow,
+      schedule,
+      showFlowTypingThenMessage,
+    ],
   );
 
   const handleOpenLiveBoard = useCallback(() => {
@@ -3750,6 +3856,12 @@ export function AgentsOnboardingView({
   }, [showTypingThenMessage]);
 
   useEffect(() => {
+    if (!openOnBoard) return;
+    if (prototypeStepIndex < ENTRY_PROTOTYPE_STEP_COUNT) return;
+    startIntroConversation();
+  }, [openOnBoard, prototypeStepIndex, startIntroConversation]);
+
+  useEffect(() => {
     return () => {
       timersRef.current.forEach((id) => window.clearTimeout(id));
       timersRef.current = [];
@@ -3825,10 +3937,16 @@ export function AgentsOnboardingView({
           : (rolePickSelection ?? agentFlow.focusPickDefault)
       : undefined;
 
+  const useMiniBoardChat =
+    startInBoardChat || Boolean(agentFlow.preferMiniChat);
   const layoutClassName = [
     styles.layout,
     showBoardView && styles.layoutBoardStage,
-    showBoardView && boardChatRevealed && styles.layoutBoardChatRevealed,
+    showBoardView &&
+      boardChatRevealed &&
+      (useMiniBoardChat
+        ? styles.layoutBoardChatMini
+        : styles.layoutBoardChatRevealed),
     !showBoardView && showInvitePanel && styles.layoutWithInvitePanel,
   ]
     .filter(Boolean)
@@ -4082,6 +4200,10 @@ export function AgentsOnboardingView({
         <ConversationBlock message={CANDIDATE_FEEDBACK_SCRIPT_MESSAGE} />
       )}
       {feedbackChoice1 && <UserMessage text={feedbackChoice1} />}
+      {packagedBoardUpdateTyping && <TypingIndicator />}
+      {packagedBoardUpdateMessage && (
+        <ConversationBlock message={packagedBoardUpdateMessage} />
+      )}
       {refineThinking && <CandidatesThinkingCard />}
       {refinedTableVisible && <RefinedCandidatesTable />}
       {feedbackAsk2Visible && (
@@ -4315,7 +4437,9 @@ export function AgentsOnboardingView({
           <>
             <div
               ref={innerRef}
-              className={`${styles.boardColumn} ${styles.boardColumnEntering}`}
+              className={`${styles.boardColumn}${
+                openOnBoard ? "" : ` ${styles.boardColumnEntering}`
+              }`}
             >
               <div className={styles.boardLayoutInner}>
                 <CandidatesBoardView />
@@ -4333,7 +4457,9 @@ export function AgentsOnboardingView({
             </div>
             {boardChatRevealed && (
               <JadeChatPanel
-                className={styles.jadeChatPanelEnter}
+                className={`${styles.jadeChatPanelEnter}${
+                  useMiniBoardChat ? ` ${styles.jadeChatPanelMini}` : ""
+                }`}
                 messagesRef={scrollRef}
                 chatContentRef={chatContentRef}
                 scrollEndRef={scrollEndRef}
@@ -4351,6 +4477,7 @@ export function AgentsOnboardingView({
                     {conversationMessages}
                   </div>
                 )}
+                {showPromptActionCard ? actionCardDock : null}
                 {showInvitePanel && (
                   <div className={styles.jadeChatInviteBlock}>
                     <p className={styles.jadeChatInviteTitle}>
@@ -4412,7 +4539,7 @@ export function AgentsOnboardingView({
               {showBoardHandoffTooltip && (
                 <TourSpotlightTooltip
                   targetSelector="focus-board"
-                  text="Here's your live Candidates board — click it to open the full list and see everyone I've sourced."
+                  text={`Here's your live ${agentFlow.boardLabels.mainBoard} board — click it to open the full list and see everyone I've sourced.`}
                   isLastStep
                   onNext={handleOpenLiveBoard}
                   onSkip={() => {

@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import type { BoardTableRow } from "../data/nikeScanFlow";
 
 export type WorkspaceEntryMode = "home" | "board" | "conversation";
 
@@ -13,6 +14,10 @@ interface WorkspaceBoardsContextValue {
   boards: string[];
   setBoards: (boards: string[]) => void;
   clearBoards: () => void;
+  appendedBoardRows: BoardTableRow[];
+  enteringBoardRowNames: string[];
+  appendBoardRow: (row: BoardTableRow) => void;
+  clearAppendedBoardRows: () => void;
   highlightedTarget: string | null;
   setHighlightedTarget: (target: string | null) => void;
   /** When true, MainLayout forces the workspace side panel open. */
@@ -41,6 +46,10 @@ const WorkspaceBoardsContext = createContext<WorkspaceBoardsContextValue>({
   boards: [],
   setBoards: () => {},
   clearBoards: () => {},
+  appendedBoardRows: [],
+  enteringBoardRowNames: [],
+  appendBoardRow: () => {},
+  clearAppendedBoardRows: () => {},
   highlightedTarget: null,
   setHighlightedTarget: () => {},
   panelForceOpen: false,
@@ -60,6 +69,13 @@ const WorkspaceBoardsContext = createContext<WorkspaceBoardsContextValue>({
 
 export function WorkspaceBoardsProvider({ children }: { children: ReactNode }) {
   const [boards, setBoardsState] = useState<string[]>([]);
+  const [appendedBoardRows, setAppendedBoardRows] = useState<BoardTableRow[]>(
+    [],
+  );
+  const [enteringBoardRowNames, setEnteringBoardRowNames] = useState<string[]>(
+    [],
+  );
+  const enteringTimersRef = useRef<number[]>([]);
   const [highlightedTarget, setHighlightedTarget] = useState<string | null>(
     null,
   );
@@ -75,15 +91,42 @@ export function WorkspaceBoardsProvider({ children }: { children: ReactNode }) {
     setWorkspaceEntryModeState(mode);
   }, []);
 
+  const clearAppendedBoardRows = useCallback(() => {
+    enteringTimersRef.current.forEach((id) => window.clearTimeout(id));
+    enteringTimersRef.current = [];
+    setAppendedBoardRows([]);
+    setEnteringBoardRowNames([]);
+  }, []);
+
+  const appendBoardRow = useCallback((row: BoardTableRow) => {
+    setAppendedBoardRows((prev) => {
+      if (prev.some((existing) => existing.name === row.name)) return prev;
+      return [...prev, row];
+    });
+    setEnteringBoardRowNames((prev) =>
+      prev.includes(row.name) ? prev : [...prev, row.name],
+    );
+    const timerId = window.setTimeout(() => {
+      setEnteringBoardRowNames((prev) =>
+        prev.filter((name) => name !== row.name),
+      );
+      enteringTimersRef.current = enteringTimersRef.current.filter(
+        (id) => id !== timerId,
+      );
+    }, 900);
+    enteringTimersRef.current.push(timerId);
+  }, []);
+
   const resetWorkspaceSession = useCallback(() => {
     setBoardsState([]);
+    clearAppendedBoardRows();
     setLiveBoardReady(false);
     setWorkspaceEntryModeState("conversation");
     setBoardStageActive(false);
     setBoardHandoffActive(false);
     setPanelForceOpen(false);
     setHighlightedTarget(null);
-  }, []);
+  }, [clearAppendedBoardRows]);
 
   const setBoards = useCallback((nextBoards: string[]) => {
     setBoardsState(nextBoards);
@@ -110,6 +153,10 @@ export function WorkspaceBoardsProvider({ children }: { children: ReactNode }) {
         boards,
         setBoards,
         clearBoards,
+        appendedBoardRows,
+        enteringBoardRowNames,
+        appendBoardRow,
+        clearAppendedBoardRows,
         highlightedTarget,
         setHighlightedTarget,
         panelForceOpen,

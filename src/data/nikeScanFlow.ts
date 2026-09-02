@@ -395,6 +395,9 @@ export type BoardTableRow = {
   /** Optional current employer, rendered in the last column when present. */
   company?: string;
   personActive?: boolean;
+  stage?: string;
+  stageColor?: string;
+  email?: string;
 };
 
 export type BoardTableGroup = {
@@ -403,6 +406,7 @@ export type BoardTableGroup = {
   color: string;
   /** Optional label for the trailing board column (defaults to blank). */
   lastColumnLabel?: string;
+  variant?: "pipeline";
   rows: BoardTableRow[];
 };
 

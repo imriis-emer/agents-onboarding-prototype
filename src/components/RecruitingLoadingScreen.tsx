@@ -17,8 +17,8 @@ interface RecruitingLoadingScreenProps {
   compact?: boolean;
   /** 2× size for preview iteration only. */
   large?: boolean;
-  /** Agent wake-up sequence vs post-signup account creation. */
-  variant?: "agent" | "account";
+  /** Agent wake-up sequence, post-signup account creation, or logo only. */
+  variant?: "agent" | "account" | "logo";
 }
 
 export function RecruitingLoadingScreen({
@@ -30,8 +30,13 @@ export function RecruitingLoadingScreen({
   variant = "agent",
 }: RecruitingLoadingScreenProps) {
   const flow = useAgentFlow();
+  const isLogoOnly = variant === "logo";
   const messages =
-    variant === "account" ? ACCOUNT_CREATING_MESSAGES : flow.loading.messages;
+    variant === "account"
+      ? ACCOUNT_CREATING_MESSAGES
+      : isLogoOnly
+        ? []
+        : flow.loading.messages;
   const messageRef = useRef<HTMLParagraphElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const dotsRef = useRef<HTMLSpanElement>(null);
@@ -47,7 +52,7 @@ export function RecruitingLoadingScreen({
     const textEl = textRef.current;
     const dotsEl = dotsRef.current;
 
-    if (!messageEl || !textEl || !dotsEl) return;
+    if (isLogoOnly || !messageEl || !textEl || !dotsEl) return;
 
     const controller = new AbortController();
     completedRef.current = false;
@@ -74,7 +79,7 @@ export function RecruitingLoadingScreen({
       });
 
     return () => controller.abort();
-  }, [autoCompleteAfterMs, messages, preview, variant]);
+  }, [autoCompleteAfterMs, isLogoOnly, messages, preview, variant]);
 
   useEffect(() => {
     if (preview || autoCompleteAfterMs === undefined) return;
@@ -107,20 +112,24 @@ export function RecruitingLoadingScreen({
             className={styles.loader}
             aria-hidden="true"
           />
-          <p ref={messageRef} className={styles.message}>
-            <span ref={textRef} className={styles.messageText} />
-            <span ref={dotsRef} className={styles.dots}>
-              <span className={styles.dot} data-dot>
-                .
+          {isLogoOnly ? (
+            <span className={styles.srOnly}>Loading monday.com</span>
+          ) : (
+            <p ref={messageRef} className={styles.message}>
+              <span ref={textRef} className={styles.messageText} />
+              <span ref={dotsRef} className={styles.dots}>
+                <span className={styles.dot} data-dot>
+                  .
+                </span>
+                <span className={styles.dot} data-dot>
+                  .
+                </span>
+                <span className={styles.dot} data-dot>
+                  .
+                </span>
               </span>
-              <span className={styles.dot} data-dot>
-                .
-              </span>
-              <span className={styles.dot} data-dot>
-                .
-              </span>
-            </span>
-          </p>
+            </p>
+          )}
         </div>
       </div>
     </div>

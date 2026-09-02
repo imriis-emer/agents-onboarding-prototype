@@ -1,0 +1,119 @@
+.page {
+  position: relative;
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #fff;
+}
+
+.formPanel,
+.formFill {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  height: 100%;
+  min-height: 0;
+  padding: 82px 24px 104px 112px;
+  box-sizing: border-box;
+}
+
+.formPanelCentered {
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.formFill {
+  width: 100%;
+  padding: 0 0 56px;
+}
+
+.formBody {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 30px;
+  width: 100%;
+  max-width: 581px;
+  min-height: 0;
+}
+
+.formBodyCentered {
+  flex: 0 1 auto;
+  max-width: 411px;
+  gap: 0;
+}
+
+.formBodyWide {
+  max-width: 581px;
+}
+
+.footer {
+  position: absolute;
+  left: 112px;
+  bottom: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(581px, calc(50vw - 136px));
+  min-height: 40px;
+
+  > :last-child {
+    margin-left: auto;
+  }
+}
+
+.formFill .footer {
+  left: 0;
+  bottom: 0;
+  width: min(581px, 100%);
+}
+
+.footerHidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.visualPanel {
+  position: absolute;
+  z-index: 2;
+  top: 25px;
+  right: 23px;
+  bottom: 25px;
+  left: calc(50% + 23px);
+  overflow: hidden;
+  border-radius: 19px;
+  background: #eefdfe;
+}
+
+.visualImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (max-width: 960px) {
+  .formPanel,
+  .formFill,
+  .formPanelCentered {
+    width: 100%;
+    padding: 32px 24px;
+  }
+
+  .footer,
+  .formFill .footer {
+    position: static;
+    left: auto;
+    bottom: auto;
+    width: 100%;
+    max-width: none;
+  }
+
+  .visualPanel {
+    display: none;
+  }
+}

@@ -2,13 +2,19 @@ import { useState } from "react";
 import { Button } from "@vibe/core";
 import { MoveArrowRight } from "@mondaydotcomorg/icons";
 import { MondayMulticolorMark } from "./ProductLogos";
-import generalSignupVisual from "../assets/agents-onboarding/general-signup-visual.png";
-import { GENERAL_FOCUS_OPTIONS } from "../data/generalOnboardingData";
+import { OnboardingSplitLayout } from "./OnboardingSplitLayout";
+import {
+  GENERAL_FOCUS_OPTIONS,
+  getFocusVisualSrc,
+} from "../data/generalOnboardingData";
+import splitStyles from "./OnboardingSplitLayout.module.scss";
 import styles from "./GeneralFocusQuestionPage.module.scss";
 
 export function GeneralFocusQuestionPage({
   onBack,
   onContinue,
+  onFocusChange,
+  initialFocusId = "",
   embedded = false,
   hideCards = false,
   hideFooter = false,
@@ -16,30 +22,28 @@ export function GeneralFocusQuestionPage({
 }: {
   onBack: () => void;
   onContinue: (focusId: string, customLabel?: string) => void;
+  onFocusChange?: (focusId: string) => void;
+  initialFocusId?: string;
   embedded?: boolean;
   hideCards?: boolean;
   hideFooter?: boolean;
   isExiting?: boolean;
 }) {
-  const [selectedFocusId, setSelectedFocusId] = useState<string | null>(null);
-  const canContinue = selectedFocusId !== null;
+  const [selectedFocusId, setSelectedFocusId] = useState(initialFocusId);
+  const canContinue = selectedFocusId.length > 0;
+
+  const selectFocus = (focusId: string) => {
+    setSelectedFocusId(focusId);
+    onFocusChange?.(focusId);
+  };
 
   const handleContinue = () => {
-    if (!canContinue || selectedFocusId === null) return;
+    if (!canContinue) return;
     onContinue(selectedFocusId);
   };
 
-  const formContent = (
-    <div className={styles.formInner}>
-      <div className={styles.topBar}>
-        <Button kind="tertiary" size="medium" onClick={onBack}>
-          <span className={styles.backArrow} aria-hidden="true">
-            &larr;
-          </span>
-          Back
-        </Button>
-      </div>
-
+  const body = (
+    <>
       <div className={styles.logo}>
         <MondayMulticolorMark />
       </div>
@@ -49,9 +53,7 @@ export function GeneralFocusQuestionPage({
           isExiting ? styles.contentExit : ""
         }`}
       >
-        <h1 className={styles.title}>
-          What kind of work should we hand your agent?
-        </h1>
+        <h1 className={styles.title}>What&apos;s your main focus right now?</h1>
         <p className={styles.subtitle}>You can always add more in the future</p>
       </div>
 
@@ -68,50 +70,65 @@ export function GeneralFocusQuestionPage({
                 key={option.id}
                 type="button"
                 className={`${styles.focusCard} ${
-                  isSelected ? styles.focusCardSelected : ""
-                }`}
-                onClick={() => setSelectedFocusId(option.id)}
+                  option.fullWidth ? styles.focusCardFull : ""
+                } ${isSelected ? styles.focusCardSelected : ""}`}
+                onClick={() => selectFocus(option.id)}
               >
                 <span className={styles.focusCardTitle}>{option.title}</span>
-                <span className={styles.focusCardDescription}>
-                  {option.description}
-                </span>
+                {option.description ? (
+                  <span className={styles.focusCardDescription}>
+                    {option.description}
+                  </span>
+                ) : null}
               </button>
             );
           })}
         </div>
       </div>
+    </>
+  );
 
-      <div
-        className={`${styles.footer} ${
-          hideFooter ? styles.footerHidden : ""
-        } ${isExiting ? styles.contentExit : ""}`}
+  const footer = (
+    <>
+      <Button kind="tertiary" size="medium" onClick={onBack}>
+        Back
+      </Button>
+      <Button
+        kind="primary"
+        size="medium"
+        rightIcon={MoveArrowRight}
+        disabled={!canContinue}
+        onClick={handleContinue}
       >
-        <div aria-hidden="true" />
-        <Button
-          kind="primary"
-          size="medium"
-          rightIcon={MoveArrowRight}
-          disabled={!canContinue}
-          onClick={handleContinue}
-        >
-          Continue
-        </Button>
-      </div>
-    </div>
+        Continue
+      </Button>
+    </>
   );
 
   if (embedded) {
-    return <div className={styles.formPanelEmbedded}>{formContent}</div>;
+    return (
+      <div className={splitStyles.formFill}>
+        <div className={`${splitStyles.formBody} ${splitStyles.formBodyWide}`}>
+          {body}
+        </div>
+        <div
+          className={`${splitStyles.footer} ${
+            hideFooter ? splitStyles.footerHidden : ""
+          } ${isExiting ? styles.contentExit : ""}`}
+        >
+          {footer}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className={styles.page}>
-      <div className={styles.formPanel}>{formContent}</div>
-
-      <div className={styles.visualPanel} aria-hidden="true">
-        <img className={styles.visualImage} src={generalSignupVisual} alt="" />
-      </div>
-    </div>
+    <OnboardingSplitLayout
+      visualSrc={getFocusVisualSrc(selectedFocusId)}
+      wide
+      footer={hideFooter ? undefined : footer}
+    >
+      {body}
+    </OnboardingSplitLayout>
   );
 }

@@ -1,17 +1,27 @@
-import { useCallback, useEffect, useRef, useState, type UIEvent } from "react";
-import { Button, IconButton } from "@vibe/core";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type UIEvent,
+} from "react";
+import { IconButton } from "@vibe/core";
 import {
   DropdownChevronLeft,
   DropdownChevronRight,
 } from "@mondaydotcomorg/icons";
+import { MondayMulticolorMark } from "./ProductLogos";
 import {
-  getAgentCardsForFocus,
-  type GeneralAgentCard,
+  getSolutionCardsForFocus,
+  type GeneralSolutionCard,
 } from "../data/generalOnboardingData";
 import type { AgentFlowId } from "../data/agentFlows";
 import styles from "./GeneralAgentSelectionPage.module.scss";
 
 const SCROLL_EDGE_PX = 16;
+const VISIBLE_CARDS = 3;
+const CARD_GAP_PX = 24;
 
 function getCardElements(scroller: HTMLDivElement): HTMLElement[] {
   const row = scroller.firstElementChild;
@@ -33,17 +43,9 @@ function getCardStep(scroller: HTMLDivElement): number {
   const row = scroller.firstElementChild;
   const gap =
     row instanceof HTMLElement
-      ? Number.parseFloat(window.getComputedStyle(row).gap) || 24
-      : 24;
+      ? Number.parseFloat(window.getComputedStyle(row).gap) || CARD_GAP_PX
+      : 40;
   return card.offsetWidth + gap;
-}
-
-function getScrollPage(scroller: HTMLDivElement): number {
-  const step = getCardStep(scroller);
-  if (step <= 0) return scroller.clientWidth;
-
-  const visibleCards = Math.max(1, Math.floor(scroller.clientWidth / step));
-  return step * Math.max(2, visibleCards);
 }
 
 function getActiveCardIndex(
@@ -76,61 +78,32 @@ function getActiveCardIndex(
   return closestIndex;
 }
 
-function AgentSelectionCard({
+function SolutionCard({
   card,
   onSelect,
 }: {
-  card: GeneralAgentCard;
-  onSelect: (card: GeneralAgentCard) => void;
+  card: GeneralSolutionCard;
+  onSelect: (card: GeneralSolutionCard) => void;
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const playVideo = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.currentTime = 0;
-    video.muted = false;
-    video.volume = 1;
-    void video.play().catch(() => {
-      video.muted = true;
-      void video.play().catch(() => undefined);
-    });
-  };
-
-  const pauseVideo = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.pause();
-    video.currentTime = 0;
-    video.muted = true;
-  };
-
   return (
     <button
       type="button"
-      className={styles.agentCard}
-      style={{ backgroundColor: card.bg }}
+      className={styles.solutionCard}
       onClick={() => onSelect(card)}
-      onMouseEnter={playVideo}
-      onMouseLeave={pauseVideo}
-      onFocus={playVideo}
-      onBlur={pauseVideo}
     >
-      <video
-        ref={videoRef}
-        className={styles.agentImage}
-        src={card.video}
-        poster={card.poster}
-        preload="metadata"
-        playsInline
-        loop
-        muted
-        aria-hidden="true"
-      />
-      <div className={styles.agentPanel}>
-        <span className={styles.agentName}>{card.agentName}</span>
-        <span className={styles.agentTitle}>{card.title}</span>
-        <p className={styles.agentDescription}>{card.description}</p>
+      <div className={styles.solutionPreview}>
+        <img className={styles.solutionImage} src={card.image} alt="" />
+      </div>
+      <div className={styles.solutionBody}>
+        <h2 className={styles.solutionTitle}>{card.title}</h2>
+        <ol className={styles.solutionBullets}>
+          {card.bullets.map((bullet, index) => (
+            <li key={bullet}>
+              <span className={styles.bulletIndex}>{index + 1}</span>
+              {bullet}
+            </li>
+          ))}
+        </ol>
       </div>
     </button>
   );
@@ -139,20 +112,23 @@ function AgentSelectionCard({
 export function GeneralAgentSelectionPage({
   focusId,
   onSelectAgent,
-  onBack,
+  onStartFromScratch,
   embedded = false,
 }: {
   focusId: string;
   focusLabel?: string;
-  onSelectAgent: (flowId: AgentFlowId, card: GeneralAgentCard) => void;
+  onSelectAgent: (flowId: AgentFlowId, card: GeneralSolutionCard) => void;
   onBack?: () => void;
+  onStartFromScratch?: () => void;
   embedded?: boolean;
 }) {
-  const cards = getAgentCardsForFocus(focusId);
+  const cards = getSolutionCardsForFocus(focusId);
+  const viewportRef = useRef<HTMLDivElement>(null);
   const cardRowRef = useRef<HTMLDivElement>(null);
+  const [cardWidth, setCardWidth] = useState<number | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(cards.length > 1);
+  const [canScrollRight, setCanScrollRight] = useState(cards.length > 3);
 
   const updateScrollState = useCallback(
     (scroller: HTMLDivElement) => {
@@ -167,17 +143,25 @@ export function GeneralAgentSelectionPage({
   );
 
   useEffect(() => {
+    const viewport = viewportRef.current;
     const scroller = cardRowRef.current;
-    if (!scroller) return;
+    if (!viewport || !scroller) return;
 
-    const measure = () => updateScrollState(scroller);
+    const measure = () => {
+      const gap =
+        window.matchMedia("(max-width: 960px)").matches ? 16 : CARD_GAP_PX;
+      const nextWidth = Math.floor(
+        (viewport.clientWidth - gap * (VISIBLE_CARDS - 1)) / VISIBLE_CARDS,
+      );
+      setCardWidth((prev) => (prev === nextWidth ? prev : nextWidth));
+      updateScrollState(scroller);
+    };
     measure();
     const frame = window.requestAnimationFrame(measure);
 
     const observer = new ResizeObserver(measure);
+    observer.observe(viewport);
     observer.observe(scroller);
-    const row = scroller.firstElementChild;
-    if (row instanceof HTMLElement) observer.observe(row);
 
     return () => {
       window.cancelAnimationFrame(frame);
@@ -185,10 +169,8 @@ export function GeneralAgentSelectionPage({
     };
   }, [updateScrollState]);
 
-  const handleCardSelect = (card: GeneralAgentCard) => {
-    if (card.flowId) {
-      onSelectAgent(card.flowId, card);
-    }
+  const handleCardSelect = (card: GeneralSolutionCard) => {
+    onSelectAgent(card.flowId, card);
   };
 
   const handleCardRowScroll = (event: UIEvent<HTMLDivElement>) => {
@@ -202,10 +184,10 @@ export function GeneralAgentSelectionPage({
     const maxScroll = getMaxScroll(scroller);
     if (maxScroll <= 0) return;
 
-    const page = getScrollPage(scroller);
+    const step = getCardStep(scroller);
     const nextLeft = Math.max(
       0,
-      Math.min(maxScroll, scroller.scrollLeft + direction * page),
+      Math.min(maxScroll, scroller.scrollLeft + direction * step),
     );
     if (Math.abs(nextLeft - scroller.scrollLeft) < 1) return;
 
@@ -215,71 +197,58 @@ export function GeneralAgentSelectionPage({
   return (
     <div className={embedded ? styles.embeddedPage : styles.page}>
       <div className={styles.content}>
-        {onBack && (
-          <div className={styles.topBar}>
-            <Button kind="tertiary" size="medium" onClick={onBack}>
-              <span className={styles.backArrow} aria-hidden="true">
-                &larr;
-              </span>
-              Back
-            </Button>
-          </div>
-        )}
-
         <div className={styles.headingBlock}>
-          <h1 className={styles.title}>Choose your first team member</h1>
-          <p className={styles.subtitle}>Pick one to start. Add more later.</p>
+          <div className={styles.logo}>
+            <MondayMulticolorMark />
+          </div>
+          <h1 className={styles.title}>Choose the right solution for you</h1>
         </div>
 
         <div className={styles.cardStrip}>
-          <div
-            ref={cardRowRef}
-            className={styles.cardScroller}
-            onScroll={handleCardRowScroll}
-          >
-            <div className={styles.cardRow}>
-              {cards.map((card) => (
-                <AgentSelectionCard
-                  key={card.id}
-                  card={card}
-                  onSelect={handleCardSelect}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div
-            className={`${styles.edgeFade} ${styles.edgeFadeLeft}${
-              canScrollLeft ? "" : ` ${styles.edgeHidden}`
-            }`}
-            aria-hidden="true"
-          />
-          <div
-            className={`${styles.edgeFade} ${styles.edgeFadeRight}${
-              canScrollRight ? "" : ` ${styles.edgeHidden}`
-            }`}
-            aria-hidden="true"
-          />
-
           <IconButton
-            className={`${styles.edgeButton} ${styles.edgeButtonLeft}${
-              canScrollLeft ? "" : ` ${styles.edgeHidden}`
-            }`}
+            className={`${styles.edgeButton} ${styles.edgeButtonLeft}`}
             icon={DropdownChevronLeft}
             kind="tertiary"
             size="medium"
-            aria-label="Previous agents"
+            aria-label="Previous solutions"
             disabled={!canScrollLeft}
             onClick={() => scrollByCard(-1)}
           />
+
+          <div
+            ref={viewportRef}
+            className={styles.cardViewport}
+            style={
+              cardWidth
+                ? ({
+                    "--solution-card-width": `${cardWidth}px`,
+                  } as CSSProperties)
+                : undefined
+            }
+          >
+            <div
+              ref={cardRowRef}
+              className={styles.cardScroller}
+              onScroll={handleCardRowScroll}
+            >
+              <div className={styles.cardRow}>
+                {cards.map((card) => (
+                  <SolutionCard
+                    key={card.id}
+                    card={card}
+                    onSelect={handleCardSelect}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
           <IconButton
-            className={`${styles.edgeButton} ${styles.edgeButtonRight}${
-              canScrollRight ? "" : ` ${styles.edgeHidden}`
-            }`}
+            className={`${styles.edgeButton} ${styles.edgeButtonRight}`}
             icon={DropdownChevronRight}
             kind="tertiary"
             size="medium"
-            aria-label="Next agents"
+            aria-label="Next solutions"
             disabled={!canScrollRight}
             onClick={() => scrollByCard(1)}
           />
@@ -302,8 +271,12 @@ export function GeneralAgentSelectionPage({
 
         <div className={styles.galleryPrompt}>
           <span>None of these quite fit?</span>
-          <button type="button" className={styles.galleryButton}>
-            Browse agents gallery
+          <button
+            type="button"
+            className={styles.galleryButton}
+            onClick={onStartFromScratch}
+          >
+            Start from scratch
           </button>
         </div>
       </div>

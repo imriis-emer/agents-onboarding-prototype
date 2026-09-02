@@ -35,6 +35,7 @@ import {
   Widgets,
   WorkspaceHome,
 } from "@mondaydotcomorg/icons";
+import { HR_PIPELINE_DOC_TITLE } from "../data/packagedHrBoard";
 import {
   DEFAULT_EXPANDED_FOLDERS,
   DEFAULT_SELECTED_NAV_ID,
@@ -676,6 +677,8 @@ function WorkspacePanelContent({
   onCloseNavigation: () => void;
 }) {
   const { liveBoardReady } = useWorkspaceBoards();
+  const { preferMiniChat } = useAgentFlow();
+  const showWorkspaceAgents = !liveBoardReady || Boolean(preferMiniChat);
 
   return (
     <div className={styles.workspacePanel}>
@@ -688,7 +691,8 @@ function WorkspacePanelContent({
         <WorkspaceSelector />
       </div>
       <div className={styles.workspaceMenuItems}>
-        {!liveBoardReady && <WorkspaceAgentsSection />}
+        {preferMiniChat && liveBoardReady ? <WorkspaceHomeRow /> : null}
+        {showWorkspaceAgents && <WorkspaceAgentsSection />}
         <WorkspaceContentBoardsSection />
       </div>
     </div>
@@ -1171,14 +1175,23 @@ function WorkspaceSelector() {
   const workspaceOptions = useMemo(
     (): WorkspaceOption[] =>
       liveBoardReady
-        ? [
-            {
-              value: "main-workspace",
-              label: "Main workspace",
-              avatarText: "M",
-              customBackgroundColor: "#ffcb00",
-            },
-          ]
+        ? flow.preferMiniChat
+          ? [
+              {
+                value: "my-workspace",
+                label: "My workspace",
+                avatarText: "A",
+                customBackgroundColor: "#ff5ac4",
+              },
+            ]
+          : [
+              {
+                value: "main-workspace",
+                label: "Main workspace",
+                avatarText: "M",
+                customBackgroundColor: "#ffcb00",
+              },
+            ]
         : [
             {
               value: flow.id === "lia" ? "ohads-space" : "ohads-hiring",
@@ -1186,7 +1199,7 @@ function WorkspaceSelector() {
               ...WORKSPACE_AVATAR,
             },
           ],
-    [flow.id, flow.workspaceLabel, liveBoardReady],
+    [flow.id, flow.preferMiniChat, flow.workspaceLabel, liveBoardReady],
   );
   const [workspace, setWorkspace] = useState<WorkspaceOption>(
     workspaceOptions[0],
@@ -1230,10 +1243,25 @@ function WorkspaceSelector() {
   );
 }
 
+function WorkspaceHomeRow() {
+  return (
+    <button type="button" className={styles.contentBoardItem}>
+      <Icon icon={WorkspaceHome} size={20} className={styles.contentBoardIcon} />
+      <span className={styles.contentBoardLabel}>Workspace home</span>
+    </button>
+  );
+}
+
 function WorkspaceAgentsSection() {
   const flow = useAgentFlow();
   const { highlightedTarget } = useWorkspaceBoards();
   const [expanded, setExpanded] = useState(true);
+  const agentName = flow.preferMiniChat
+    ? "Interview Scheduler"
+    : flow.agentName;
+  const agentRole = flow.preferMiniChat
+    ? "Schedule interview with candidates"
+    : flow.agentRole;
 
   return (
     <section className={styles.agentsSection}>
@@ -1277,8 +1305,8 @@ function WorkspaceAgentsSection() {
               />
             </span>
             <span className={styles.agentListText}>
-              <span className={styles.agentListName}>{flow.agentName}</span>
-              <span className={styles.agentListRole}>{flow.agentRole}</span>
+              <span className={styles.agentListName}>{agentName}</span>
+              <span className={styles.agentListRole}>{agentRole}</span>
             </span>
           </button>
         </div>
@@ -1345,6 +1373,52 @@ function WorkspaceHomeNavSection() {
   );
 }
 
+function PackagedBoardContentSection() {
+  const flow = useAgentFlow();
+  const boardTitle = flow.boardLabels.mainBoard;
+  const [expanded, setExpanded] = useState(true);
+
+  return (
+    <section className={styles.contentBoardsSection}>
+      <div className={styles.contentBoardsHeaderRow}>
+        <button
+          type="button"
+          className={styles.contentBoardsHeader}
+          onClick={() => setExpanded((prev) => !prev)}
+          aria-expanded={expanded}
+        >
+          <span className={styles.sectionLabel}>Content</span>
+          <Chevron isExpanded={expanded} />
+        </button>
+        <IconButton
+          icon={SearchIcon}
+          kind="tertiary"
+          size="xxs"
+          aria-label="Search content"
+          className={styles.contentSearchButton}
+        />
+      </div>
+      {expanded && (
+        <div className={styles.contentBoardList}>
+          <button
+            type="button"
+            className={`${styles.contentBoardItem} ${styles.contentBoardItemActive}`}
+          >
+            <Icon icon={Board} size={20} className={styles.contentBoardIcon} />
+            <span className={styles.contentBoardLabel}>{boardTitle}</span>
+          </button>
+          <button type="button" className={styles.contentBoardItem}>
+            <Icon icon={Doc} size={20} className={styles.contentBoardIcon} />
+            <span className={styles.contentBoardLabel}>
+              {HR_PIPELINE_DOC_TITLE}
+            </span>
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function WorkspaceContentBoardsSection() {
   const {
     boards,
@@ -1355,6 +1429,10 @@ function WorkspaceContentBoardsSection() {
   } = useWorkspaceBoards();
   const flow = useAgentFlow();
   const [expanded, setExpanded] = useState(true);
+
+  if (flow.preferMiniChat && liveBoardReady) {
+    return <PackagedBoardContentSection />;
+  }
 
   if (liveBoardReady) {
     return <WorkspaceHomeNavSection />;

@@ -1,67 +1,46 @@
-import { LIAM_WIDE_POSTER_URL, LIAM_WIDE_VIDEO_URL } from "./agentTemplates";
-
-const posterFrom = (videoUrl: string) => videoUrl.replace(/\.mp4$/, ".jpg");
-
-const DAN_MANUAL_MUTE_VIDEO =
-  "https://dapulse-res.cloudinary.com/video/upload/v1785420416/monday_platform/AI%20agents/avatar_videos/Dan_12282824407_manual-mute-20260730/Dan_1x1_from_16x9_manual-mute-20260730.mp4";
-const RUBY_VIDEO =
-  "https://dapulse-res.cloudinary.com/video/upload/v1785398074/monday_platform/AI%20agents/avatar_videos/Ruby_12282820970_20260730-105428/Ruby_1x1_from_16x9_20260730-105428.mp4";
-const STELLA_VIDEO =
-  "https://dapulse-res.cloudinary.com/video/upload/v1785400061/monday_platform/AI%20agents/avatar_videos/Stella_12282808152_20260730-112736/Stella_1x1_from_16x9_20260730-112736.mp4";
-const MORGAN_VIDEO =
-  "https://dapulse-res.cloudinary.com/video/upload/v1785418116/monday_platform/AI%20agents/avatar_videos/Morgan_12282834524_20260730-162830/Morgan_1x1_from_16x9_20260730-162830.mp4";
-const KELLY_VIDEO =
-  "https://dapulse-res.cloudinary.com/video/upload/v1785398084/monday_platform/AI%20agents/avatar_videos/Kelly_12282814399_20260730-105428/Kelly_1x1_from_16x9_20260730-105428.mp4";
-const ABIGAIL_VIDEO =
-  "https://dapulse-res.cloudinary.com/video/upload/v1785398082/monday_platform/AI%20agents/avatar_videos/Abigail_12282823624_20260730-105428/Abigail_1x1_from_16x9_20260730-105428.mp4";
+import focusDefaultVisual from "../assets/packaged-onboarding/focus-default.png";
+import focusSalesVisual from "../assets/packaged-onboarding/focus-sales.png";
+import focusPeopleVisual from "../assets/packaged-onboarding/focus-people.png";
+import solutionOnboardingImage from "../assets/packaged-onboarding/solution-onboarding.png";
+import solutionRecruitmentImage from "../assets/packaged-onboarding/solution-recruitment.png";
+import solutionDirectoryImage from "../assets/packaged-onboarding/solution-directory.png";
+import type { AgentFlowId } from "./agentFlows";
 
 export interface GeneralFocusOption {
   id: string;
   title: string;
   description: string;
+  fullWidth?: boolean;
 }
 
-export interface GeneralAgentCard {
+export interface GeneralSolutionCard {
   id: string;
-  agentName: string;
   title: string;
+  bullets: readonly string[];
+  image: string;
+  agentName: string;
+  agentRole: string;
   description: string;
-  tags: string[];
-  bg: string;
-  video: string;
-  poster: string;
-  /** When set, selecting this card hands off to that live agent flow. */
-  flowId?: "lia" | "jade";
+  flowId: AgentFlowId;
 }
 
-export const GENERAL_DEFAULT_FOCUS_ID = "marketing";
-export const GENERAL_OTHER_FOCUS_ID = "other";
+export const GENERAL_DEFAULT_FOCUS_ID = "people";
+export const GENERAL_SCRATCH_FOCUS_ID = "scratch";
+/** @deprecated Use GENERAL_SCRATCH_FOCUS_ID */
+export const GENERAL_OTHER_FOCUS_ID = GENERAL_SCRATCH_FOCUS_ID;
 export const GENERAL_PROJECTS_FOCUS_ID = "projects";
 
-const AGENT_CARD_BACKGROUND = "#FFB691";
-
-/** Liam — Project Manager from the Agents discover gallery. */
-export const PROJECTS_LIAM_CARD: GeneralAgentCard = {
-  id: "liam-pm",
-  agentName: "Liam",
-  title: "Project Manager",
-  description:
-    "Captures goals and scope for a clear, successful project from start to finish.",
-  tags: [],
-  bg: AGENT_CARD_BACKGROUND,
-  video: LIAM_WIDE_VIDEO_URL,
-  poster: LIAM_WIDE_POSTER_URL,
-  flowId: "lia",
-};
-
-export function skipsGeneralAgentSelection(focusId: string): boolean {
-  return (
-    focusId === GENERAL_OTHER_FOCUS_ID || focusId === GENERAL_PROJECTS_FOCUS_ID
-  );
+export function skipsGeneralSolutionSelection(focusId: string): boolean {
+  return focusId === GENERAL_SCRATCH_FOCUS_ID;
 }
 
-export function startsProjectsAgentChat(focusId: string): boolean {
-  return focusId === GENERAL_PROJECTS_FOCUS_ID;
+/** @deprecated Use skipsGeneralSolutionSelection */
+export function skipsGeneralAgentSelection(focusId: string): boolean {
+  return skipsGeneralSolutionSelection(focusId);
+}
+
+export function startsProjectsAgentChat(_focusId: string): boolean {
+  return false;
 }
 
 export const GENERAL_FOCUS_OPTIONS: readonly GeneralFocusOption[] = [
@@ -71,9 +50,24 @@ export const GENERAL_FOCUS_OPTIONS: readonly GeneralFocusOption[] = [
     description: "Timelines, tasks, team coordination",
   },
   {
+    id: "sales",
+    title: "Sales & CRM",
+    description: "Leads, deals, customer relationships",
+  },
+  {
+    id: "people",
+    title: "People & recruiting",
+    description: "Hiring, onboarding, HR processes",
+  },
+  {
     id: "marketing",
     title: "Marketing & content",
     description: "Campaigns, launches, creative work",
+  },
+  {
+    id: "dev",
+    title: "Dev & product",
+    description: "Sprints, bugs, roadmap planning",
   },
   {
     id: "ops",
@@ -81,164 +75,124 @@ export const GENERAL_FOCUS_OPTIONS: readonly GeneralFocusOption[] = [
     description: "Processes, budgets, reporting",
   },
   {
-    id: "sales",
-    title: "Sales & CRM",
-    description: "Leads, deals, customer relationships",
+    id: "design",
+    title: "Design & Creative",
+    description: "Projects, feedback, delivery",
   },
   {
-    id: "productivity",
-    title: "Productivity",
-    description: "Workflows, focus, personal efficiency",
+    id: "it",
+    title: "IT",
+    description: "Requests, assets, incidents",
   },
   {
-    id: GENERAL_OTHER_FOCUS_ID,
-    title: "Other",
-    description: "I'll figure it out as I go",
-  },
-] as const;
-
-const LIA_AGENT_CARD: GeneralAgentCard = {
-  id: "lia",
-  agentName: "Dan",
-  title: "Competitive Intel Research",
-  description:
-    "I'll track competitors and surface insights, no manual digging.",
-  tags: [],
-  bg: AGENT_CARD_BACKGROUND,
-  video: DAN_MANUAL_MUTE_VIDEO,
-  poster: posterFrom(DAN_MANUAL_MUTE_VIDEO),
-  flowId: "lia",
-};
-
-const PROJECTS_AGENT_CARDS: GeneralAgentCard[] = [
-  LIA_AGENT_CARD,
-  {
-    id: "ship-product",
-    agentName: "Stella",
-    title: "Ship a product",
-    description: "Coordinates milestones, owners, and launch follow-ups.",
-    tags: ["Marketing", "HR"],
-    bg: AGENT_CARD_BACKGROUND,
-    video: STELLA_VIDEO,
-    poster: posterFrom(STELLA_VIDEO),
-  },
-  {
-    id: "marketing-campaign",
-    agentName: "Ruby",
-    title: "Run a marketing campaign",
-    description: "Builds campaign plans, tracks assets, and nudges approvals.",
-    tags: ["Intake", "Triage"],
-    bg: AGENT_CARD_BACKGROUND,
-    video: RUBY_VIDEO,
-    poster: posterFrom(RUBY_VIDEO),
-    flowId: "lia",
-  },
-  {
-    id: "close-deals",
-    agentName: "Morgan",
-    title: "Close more deals",
-    description: "Prioritizes opportunities and keeps deal next steps clear.",
-    tags: ["Drafting", "Contracts"],
-    bg: AGENT_CARD_BACKGROUND,
-    video: MORGAN_VIDEO,
-    poster: posterFrom(MORGAN_VIDEO),
-  },
-  {
-    id: "deliver-projects",
-    agentName: "Kelly",
-    title: "Deliver client projects",
-    description: "Tracks deliverables, risks, and client updates in one place.",
-    tags: ["Reporting", "Visibility"],
-    bg: AGENT_CARD_BACKGROUND,
-    video: KELLY_VIDEO,
-    poster: posterFrom(KELLY_VIDEO),
-  },
-  {
-    id: "manage-team",
-    agentName: "Abigail",
-    title: "Manage my team's work",
-    description: "Keeps team priorities, handoffs, and blockers up to date.",
-    tags: ["Compliance", "Growth"],
-    bg: AGENT_CARD_BACKGROUND,
-    video: ABIGAIL_VIDEO,
-    poster: posterFrom(ABIGAIL_VIDEO),
+    id: GENERAL_SCRATCH_FOCUS_ID,
+    title: "Start from scratch",
+    description: "",
+    fullWidth: true,
   },
 ];
 
-const MARKETING_AGENT_CARDS: GeneralAgentCard[] = [
-  LIA_AGENT_CARD,
+export const HR_SOLUTION_CARDS: readonly GeneralSolutionCard[] = [
   {
-    id: "marketing-campaign",
-    agentName: "Stella",
-    title: "Social Media Image Maker",
+    id: "employee-onboarding",
+    title: "New Employee Onboarding",
+    bullets: [
+      "Manage every new hire's onboarding schedule",
+      "Create onboarding programs automatically with AI",
+      "Track every new hire's progress to completion",
+    ],
+    image: solutionOnboardingImage,
+    agentName: "Max",
+    agentRole: "Recruitment agent",
     description:
-      "I'll generate on-brand graphics ready for any platform you post on.",
-    tags: ["Social", "Content"],
-    bg: AGENT_CARD_BACKGROUND,
-    video: STELLA_VIDEO,
-    poster: posterFrom(STELLA_VIDEO),
-    flowId: "lia",
+      "Sets up a new-hire plan, owners, and a day-one schedule so nobody starts lost.",
+    flowId: "jade",
   },
   {
-    id: "content-calendar",
-    agentName: "Ruby",
-    title: "Ad Creative Generator",
+    id: "recruitment-management",
+    title: "Recruitment Management",
+    bullets: [
+      "Track open roles & candidates in one place",
+      "Source candidates automatically with AI",
+      "Auto-transcribe every interview",
+    ],
+    image: solutionRecruitmentImage,
+    agentName: "Max",
+    agentRole: "Recruitment agent",
     description:
-      "I'll turn your campaign brief into ready-to-test ad creatives - paired copy and visuals.",
-    tags: ["Scheduling", "Drafts"],
-    bg: AGENT_CARD_BACKGROUND,
-    video: RUBY_VIDEO,
-    poster: posterFrom(RUBY_VIDEO),
-    flowId: "lia",
+      "Keeps the hiring pipeline moving — screening applicants and booking interviews.",
+    flowId: "jade",
   },
   {
-    id: "launch-campaign",
-    agentName: "Morgan",
-    title: "Brand Voice Writer",
+    id: "employee-directory",
+    title: "Employee Directory",
+    bullets: [
+      "Manage your employee directory in one place",
+      "Build & Publish org charts",
+      "Find the right person, skill, or location instantly",
+    ],
+    image: solutionDirectoryImage,
+    agentName: "Max",
+    agentRole: "Employee manager",
     description:
-      "I'll rewrite your drafts to match your brand's tone, vocabulary, and style.",
-    tags: ["Creative", "Channels"],
-    bg: AGENT_CARD_BACKGROUND,
-    video: MORGAN_VIDEO,
-    poster: posterFrom(MORGAN_VIDEO),
-    flowId: "lia",
+      "Keep all employee information and documents centralized in one place. With a dashboard, get an extensive employee breakdown with headcount by department, location and more.",
+    flowId: "jade",
   },
   {
-    id: "brand-voice",
-    agentName: "Kelly",
-    title: "Image Creator & Editor",
+    id: "time-off",
+    title: "Time off & attendance",
+    bullets: [
+      "Time-off request board",
+      "HR agent — Max",
+      "Balances, approvals, and coverage",
+    ],
+    image: solutionOnboardingImage,
+    agentName: "Max",
+    agentRole: "Recruitment agent",
     description:
-      "I'll create and edit visuals from a text prompt or your existing images, instantly.",
-    tags: ["Review", "Guidelines"],
-    bg: AGENT_CARD_BACKGROUND,
-    video: KELLY_VIDEO,
-    poster: posterFrom(KELLY_VIDEO),
-    flowId: "lia",
+      "Tracks time-off requests, balances, and coverage so approvals stay visible.",
+    flowId: "jade",
   },
   {
-    id: "social-reporting",
-    agentName: "Abigail",
-    title: "Landing Page Wireframes",
+    id: "performance-reviews",
+    title: "Performance reviews",
+    bullets: [
+      "Review cycle board",
+      "HR agent — Max",
+      "Goals, feedback, and ratings",
+    ],
+    image: solutionRecruitmentImage,
+    agentName: "Max",
+    agentRole: "Recruitment agent",
     description:
-      "I'll turn your brief into wireframes and layouts you can build on.",
-    tags: ["Analytics", "Insights"],
-    bg: AGENT_CARD_BACKGROUND,
-    video: ABIGAIL_VIDEO,
-    poster: posterFrom(ABIGAIL_VIDEO),
-    flowId: "lia",
+      "Runs review cycles with goals, feedback, and ratings in one shared board.",
+    flowId: "jade",
   },
 ];
 
 export function getFocusLabel(focusId: string): string {
   return (
     GENERAL_FOCUS_OPTIONS.find((option) => option.id === focusId)?.title ??
-    "Marketing & content"
+    "People & recruiting"
   );
 }
 
-export function getAgentCardsForFocus(focusId: string): GeneralAgentCard[] {
-  if (focusId === "marketing") {
-    return MARKETING_AGENT_CARDS;
-  }
-  return PROJECTS_AGENT_CARDS;
+export function getFocusVisualSrc(focusId: string): string {
+  if (focusId === "sales") return focusSalesVisual;
+  if (focusId === "people") return focusPeopleVisual;
+  return focusDefaultVisual;
 }
+
+export function getSolutionCardsForFocus(
+  _focusId: string,
+): readonly GeneralSolutionCard[] {
+  return HR_SOLUTION_CARDS;
+}
+
+/** @deprecated Use getSolutionCardsForFocus */
+export function getAgentCardsForFocus(focusId: string) {
+  return getSolutionCardsForFocus(focusId);
+}
+
+/** Compatibility alias while the selection page is being rewritten. */
+export type GeneralAgentCard = GeneralSolutionCard;

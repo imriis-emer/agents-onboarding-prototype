@@ -366,6 +366,23 @@
   }
 }
 
+.contentBoardsHeaderRow {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.contentBoardsHeaderRow .contentBoardsHeader {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.contentSearchButton {
+  flex: 0 0 auto;
+  color: var(--icon-color);
+}
+
 .contentBoardsHeader {
   display: flex;
   width: 100%;

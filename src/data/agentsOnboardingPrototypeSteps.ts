@@ -99,11 +99,11 @@ export const ENTRY_PROTOTYPE_STEPS = [
 ] as const;
 
 export const GENERAL_ENTRY_PROTOTYPE_STEPS = [
-  { id: "flow-select", label: "Flow select" },
   { id: "website", label: "Website" },
   { id: "signup", label: "Signup" },
+  { id: "account-form", label: "Account form" },
   { id: "focus-question", label: "Focus question" },
-  { id: "agent-selection", label: "Agent selection" },
+  { id: "solution-selection", label: "Solution selection" },
 ] as const;
 
 export const JADE_ONBOARDING_PROTOTYPE_STEPS = [

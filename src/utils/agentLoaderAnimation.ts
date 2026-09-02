@@ -25,6 +25,15 @@ export const LIA_LOADING_MESSAGES = [
   "Your agent is nearly here…",
 ] as const;
 
+export const PACKAGED_SOLUTION_LOADING_MESSAGES = [
+  "Setting up your recruitment workspace…",
+  "Preparing your pipeline…",
+  "Configuring candidate tracking…",
+  "Setting up AI sourcing…",
+  "Getting interview tools ready…",
+  "Almost ready to hire smarter…",
+] as const;
+
 export const ACCOUNT_CREATING_MESSAGES = ["Creating your account…"] as const;
 
 export function messageWithoutDots(message: string): string {

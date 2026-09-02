@@ -21,6 +21,11 @@ export interface AgentFlowOverride {
   getStartedOptions?: AgentFlowConfig["getStartedOptions"];
   onboardingReturnLines?: AgentFlowConfig["onboardingReturnLines"];
   assets?: Partial<AgentFlowConfig["assets"]>;
+  boardLabels?: Partial<AgentFlowConfig["boardLabels"]>;
+  scanFlow?: Partial<AgentFlowConfig["scanFlow"]>;
+  boardHandoff?: Partial<AgentFlowConfig["boardHandoff"]>;
+  loading?: Partial<AgentFlowConfig["loading"]>;
+  preferMiniChat?: boolean;
 }
 
 const RUBY_AD_CREATIVE_FIRST_ACTION =
@@ -137,6 +142,22 @@ export function AgentFlowProvider({
       assets: {
         ...baseFlow.assets,
         ...(agentOverride.assets ?? {}),
+      },
+      boardLabels: {
+        ...baseFlow.boardLabels,
+        ...(agentOverride.boardLabels ?? {}),
+      },
+      scanFlow: {
+        ...baseFlow.scanFlow,
+        ...(agentOverride.scanFlow ?? {}),
+      },
+      boardHandoff: {
+        ...baseFlow.boardHandoff,
+        ...(agentOverride.boardHandoff ?? {}),
+      },
+      loading: {
+        ...baseFlow.loading,
+        ...(agentOverride.loading ?? {}),
       },
     };
   }, [agentOverride, baseFlow]);

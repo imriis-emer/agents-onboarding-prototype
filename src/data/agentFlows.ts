@@ -17,6 +17,7 @@ import {
   AGENT_LOADING_MESSAGES,
   JADE_LOADING_MESSAGES,
   LIA_LOADING_MESSAGES,
+  PACKAGED_SOLUTION_LOADING_MESSAGES,
 } from "../utils/agentLoaderAnimation";
 import * as jadeScanFlow from "./nikeScanFlow";
 import type { BoardTourStep } from "./nikeScanFlow";
@@ -132,7 +133,8 @@ export interface AgentFlowConfig {
     messages:
       | typeof AGENT_LOADING_MESSAGES
       | typeof JADE_LOADING_MESSAGES
-      | typeof LIA_LOADING_MESSAGES;
+      | typeof LIA_LOADING_MESSAGES
+      | typeof PACKAGED_SOLUTION_LOADING_MESSAGES;
   };
   heroGreeting: string;
   videoPlayingCopy: string;
@@ -169,6 +171,7 @@ export interface AgentFlowConfig {
     /** Agent messages streamed in chat after the board opens (used with skipTour). */
     chatIntroMessages?: readonly AgentFlowScriptMessage[];
   };
+  preferMiniChat?: boolean;
 }
 
 const JADE_SCAN: AgentScanFlowData = {
@@ -433,7 +436,7 @@ export const AGENT_FLOWS: Record<AgentFlowId, AgentFlowConfig> = {
       pipelineSampleRole: "Talent acquisition",
     },
     signup: {
-      tagline: "Your first agent, ready in minutes",
+      tagline: "Get started – it's free. No credit card needed.",
       visual: generalSignupVisual,
     },
     loading: {

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Button, Checkbox, Icon, IconButton, Toggle } from "@vibe/core";
 import {
   Add,
@@ -717,7 +717,7 @@ export function JobsTriggersList() {
 }
 
 function BoardTableGroupView({ group }: { group: BoardTableGroup }) {
-  const { highlightedTarget } = useWorkspaceBoards();
+  const { highlightedTarget, enteringBoardRowNames } = useWorkspaceBoards();
   const personTourActive = highlightedTarget === "board-person-column";
 
   return (
@@ -735,7 +735,11 @@ function BoardTableGroupView({ group }: { group: BoardTableGroup }) {
         <span>{group.title}</span>
       </button>
 
-      <div className={styles.boardGrid}>
+      <div
+        className={`${styles.boardGrid}${
+          group.variant === "pipeline" ? ` ${styles.boardGridPipeline}` : ""
+        }`}
+      >
         <div className={styles.boardGridHeader}>
           <div className={styles.boardCellCheckboxHead}>
             <span
@@ -743,10 +747,21 @@ function BoardTableGroupView({ group }: { group: BoardTableGroup }) {
               style={{ backgroundColor: group.color }}
             />
           </div>
-          <div className={styles.boardCellHead}>Item</div>
-          <div className={styles.boardCellHead}>Person</div>
-          <div className={styles.boardCellHead}>Status</div>
-          <div className={styles.boardCellHead}>Location</div>
+          <div className={styles.boardCellHead}>
+            {group.variant === "pipeline" ? "Candidate" : "Item"}
+          </div>
+          {group.variant === "pipeline" ? (
+            <div className={styles.boardCellHead}>Current Stage</div>
+          ) : null}
+          <div className={styles.boardCellHead}>
+            {group.variant === "pipeline" ? "Assigned" : "Person"}
+          </div>
+          {group.variant === "pipeline" ? null : (
+            <div className={styles.boardCellHead}>Status</div>
+          )}
+          {group.variant === "pipeline" ? null : (
+            <div className={styles.boardCellHead}>Location</div>
+          )}
           {group.lastColumnLabel ? (
             <div className={styles.boardCellHead}>{group.lastColumnLabel}</div>
           ) : (
@@ -755,7 +770,14 @@ function BoardTableGroupView({ group }: { group: BoardTableGroup }) {
         </div>
 
         {group.rows.map((row, index) => (
-          <div key={row.name} className={styles.boardGridRow}>
+          <div
+            key={row.name}
+            className={`${styles.boardGridRow}${
+              enteringBoardRowNames.includes(row.name)
+                ? ` ${styles.boardGridRowEnter}`
+                : ""
+            }`}
+          >
             <div className={styles.boardCellCheckbox}>
               <span
                 className={styles.boardStripe}
@@ -777,6 +799,16 @@ function BoardTableGroupView({ group }: { group: BoardTableGroup }) {
                 className={styles.boardCellItemAction}
               />
             </div>
+            {group.variant === "pipeline" ? (
+              <div className={styles.boardCellStatus}>
+                <span
+                  className={styles.boardStatusPill}
+                  style={{ backgroundColor: row.stageColor ?? "#ecedf5" }}
+                >
+                  {row.stage}
+                </span>
+              </div>
+            ) : null}
             <div
               className={`${styles.boardCellPerson} ${
                 row.personActive ? styles.boardCellPersonActive : ""
@@ -793,12 +825,16 @@ function BoardTableGroupView({ group }: { group: BoardTableGroup }) {
                 <Icon icon={Person} size={16} />
               </span>
             </div>
-            <div className={styles.boardCellStatus}>
-              <span className={styles.boardStatusPill} aria-hidden="true" />
-            </div>
-            <div className={styles.boardCellText}>{row.location}</div>
+            {group.variant === "pipeline" ? null : (
+              <div className={styles.boardCellStatus}>
+                <span className={styles.boardStatusPill} aria-hidden="true" />
+              </div>
+            )}
+            {group.variant === "pipeline" ? null : (
+              <div className={styles.boardCellText}>{row.location}</div>
+            )}
             <div className={styles.boardCellText}>
-              {row.company ?? row.timeline}
+              {row.email ?? row.company ?? row.timeline}
             </div>
           </div>
         ))}
@@ -914,10 +950,20 @@ function BoardChromeShell({
 
 export function CandidatesBoardView() {
   const flow = useAgentFlow();
+  const { appendedBoardRows } = useWorkspaceBoards();
+  const groups = useMemo(
+    () =>
+      flow.scanFlow.boardTableGroups.map((group, index) =>
+        index === 0 && appendedBoardRows.length > 0
+          ? { ...group, rows: [...appendedBoardRows, ...group.rows] }
+          : group,
+      ),
+    [appendedBoardRows, flow.scanFlow.boardTableGroups],
+  );
 
   return (
     <BoardChromeShell boardTitle={flow.boardLabels.mainBoard}>
-      {flow.scanFlow.boardTableGroups.map((group) => (
+      {groups.map((group) => (
         <BoardTableGroupView key={group.id} group={group} />
       ))}
     </BoardChromeShell>
