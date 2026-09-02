@@ -202,10 +202,13 @@
   cursor: pointer;
   scroll-snap-align: start;
   text-align: left;
-  transition: transform 160ms ease;
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease;
 
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgb(20 18 60 / 10%);
   }
 }
 

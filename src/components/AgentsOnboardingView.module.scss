@@ -3556,8 +3556,10 @@
   .boardGridRow,
   .boardGridRowAdd {
     grid-template-columns:
-      36px minmax(180px, 1.2fr) 140px 72px minmax(160px, 1fr)
-      minmax(88px, 0.6fr);
+      36px minmax(160px, 1.1fr) minmax(140px, 0.9fr) 140px 72px minmax(
+        140px,
+        1fr
+      );
   }
 }
 

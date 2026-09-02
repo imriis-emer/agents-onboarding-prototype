@@ -6,6 +6,8 @@ import {
 
 export const HR_PIPELINE_BOARD_TITLE = "HR recruitment pipeline";
 export const HR_PIPELINE_DOC_TITLE = "How to transcribe your interviews";
+export const HR_PIPELINE_HIRE_ROLE = "3D Footwear Designer";
+export const HR_PIPELINE_PLACEHOLDER_ROLE = "Role title";
 
 /** Replace Jade's "Candidates board" wording so chat matches the live board. */
 export function rewriteCandidatesBoardName(
@@ -31,6 +33,7 @@ export const HR_PIPELINE_BOARD_GROUPS: BoardTableGroup[] = [
         stage: "Applied",
         stageColor: "#323338",
         email: "john.doe@email.com",
+        role: HR_PIPELINE_PLACEHOLDER_ROLE,
         personActive: true,
       },
       {
@@ -41,6 +44,7 @@ export const HR_PIPELINE_BOARD_GROUPS: BoardTableGroup[] = [
         stage: "Offered",
         stageColor: "#00c875",
         email: "jane.doe@email.com",
+        role: HR_PIPELINE_PLACEHOLDER_ROLE,
       },
       {
         name: "John Smith",
@@ -50,6 +54,7 @@ export const HR_PIPELINE_BOARD_GROUPS: BoardTableGroup[] = [
         stage: "Interviewing",
         stageColor: "#fdab3d",
         email: "john.smith@email.com",
+        role: HR_PIPELINE_PLACEHOLDER_ROLE,
       },
     ],
   },
@@ -65,6 +70,7 @@ export const PACKAGED_APPROVED_CANDIDATES: BoardTableRow[] =
     stage: "Applied",
     stageColor: "#323338",
     email: `${row.name.toLowerCase().replace(/\s+/g, ".")}@email.com`,
+    role: HR_PIPELINE_HIRE_ROLE,
     personActive: index === 0,
   }));
 

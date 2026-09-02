@@ -86,7 +86,7 @@ export const GENERAL_FOCUS_OPTIONS: readonly GeneralFocusOption[] = [
   },
   {
     id: GENERAL_SCRATCH_FOCUS_ID,
-    title: "Start from scratch",
+    title: "Other",
     description: "",
     fullWidth: true,
   },

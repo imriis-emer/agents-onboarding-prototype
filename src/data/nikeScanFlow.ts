@@ -398,6 +398,7 @@ export type BoardTableRow = {
   stage?: string;
   stageColor?: string;
   email?: string;
+  role?: string;
 };
 
 export type BoardTableGroup = {

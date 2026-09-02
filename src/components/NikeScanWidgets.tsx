@@ -751,6 +751,9 @@ function BoardTableGroupView({ group }: { group: BoardTableGroup }) {
             {group.variant === "pipeline" ? "Candidate" : "Item"}
           </div>
           {group.variant === "pipeline" ? (
+            <div className={styles.boardCellHead}>Role</div>
+          ) : null}
+          {group.variant === "pipeline" ? (
             <div className={styles.boardCellHead}>Current Stage</div>
           ) : null}
           <div className={styles.boardCellHead}>
@@ -799,6 +802,9 @@ function BoardTableGroupView({ group }: { group: BoardTableGroup }) {
                 className={styles.boardCellItemAction}
               />
             </div>
+            {group.variant === "pipeline" ? (
+              <div className={styles.boardCellText}>{row.role ?? ""}</div>
+            ) : null}
             {group.variant === "pipeline" ? (
               <div className={styles.boardCellStatus}>
                 <span
