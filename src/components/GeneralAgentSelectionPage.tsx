@@ -231,32 +231,61 @@ export function GeneralAgentSelectionPage({
           <p className={styles.subtitle}>Pick one to start. Add more later.</p>
         </div>
 
-        <div
-          ref={cardRowRef}
-          className={styles.cardScroller}
-          onScroll={handleCardRowScroll}
-        >
-          <div className={styles.cardRow}>
-            {cards.map((card) => (
-              <AgentSelectionCard
-                key={card.id}
-                card={card}
-                onSelect={handleCardSelect}
-              />
-            ))}
+        <div className={styles.cardStrip}>
+          <div
+            ref={cardRowRef}
+            className={styles.cardScroller}
+            onScroll={handleCardRowScroll}
+          >
+            <div className={styles.cardRow}>
+              {cards.map((card) => (
+                <AgentSelectionCard
+                  key={card.id}
+                  card={card}
+                  onSelect={handleCardSelect}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div className={styles.carouselNav}>
+          <div
+            className={`${styles.edgeFade} ${styles.edgeFadeLeft}${
+              canScrollLeft ? "" : ` ${styles.edgeHidden}`
+            }`}
+            aria-hidden="true"
+          />
+          <div
+            className={`${styles.edgeFade} ${styles.edgeFadeRight}${
+              canScrollRight ? "" : ` ${styles.edgeHidden}`
+            }`}
+            aria-hidden="true"
+          />
+
           <IconButton
-            className={styles.carouselButton}
+            className={`${styles.edgeButton} ${styles.edgeButtonLeft}${
+              canScrollLeft ? "" : ` ${styles.edgeHidden}`
+            }`}
             icon={DropdownChevronLeft}
             kind="tertiary"
-            size="small"
+            size="medium"
             aria-label="Previous agents"
             disabled={!canScrollLeft}
             onClick={() => scrollByCard(-1)}
           />
+          <IconButton
+            className={`${styles.edgeButton} ${styles.edgeButtonRight}${
+              canScrollRight ? "" : ` ${styles.edgeHidden}`
+            }`}
+            icon={DropdownChevronRight}
+            kind="tertiary"
+            size="medium"
+            aria-label="Next agents"
+            disabled={!canScrollRight}
+            onClick={() => scrollByCard(1)}
+          />
+        </div>
+
+        <div className={styles.carouselNav}>
           <div className={styles.dots} aria-hidden="true">
             {cards.map((card, index) => (
               <span
@@ -269,15 +298,6 @@ export function GeneralAgentSelectionPage({
               />
             ))}
           </div>
-          <IconButton
-            className={styles.carouselButton}
-            icon={DropdownChevronRight}
-            kind="tertiary"
-            size="small"
-            aria-label="Next agents"
-            disabled={!canScrollRight}
-            onClick={() => scrollByCard(1)}
-          />
         </div>
 
         <div className={styles.galleryPrompt}>

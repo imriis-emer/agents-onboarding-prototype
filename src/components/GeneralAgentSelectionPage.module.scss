@@ -100,12 +100,18 @@
   color: #000;
 }
 
-.cardScroller {
+.cardStrip {
+  position: relative;
   align-self: stretch;
   width: calc(100% + 64px);
   min-width: 0;
   margin-top: 16px;
   margin-inline: -32px;
+}
+
+.cardScroller {
+  width: 100%;
+  min-width: 0;
   overflow-x: auto;
   scroll-snap-type: x proximity;
   scrollbar-width: none;
@@ -248,6 +254,103 @@
   color: #676879;
 }
 
+.edgeFade,
+.edgeButton {
+  position: absolute;
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.cardStrip:hover .edgeFade,
+.cardStrip:hover .edgeButton,
+.cardStrip:focus-within .edgeFade,
+.cardStrip:focus-within .edgeButton {
+  opacity: 1;
+}
+
+.cardStrip:hover .edgeButton,
+.cardStrip:focus-within .edgeButton {
+  pointer-events: auto;
+}
+
+.edgeHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cardStrip:hover .edgeHidden,
+.cardStrip:focus-within .edgeHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.edgeFade {
+  top: 12px;
+  bottom: 12px;
+  width: 96px;
+}
+
+.edgeFadeLeft {
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    rgb(255 255 255 / 88%) 0%,
+    rgb(255 255 255 / 0%) 100%
+  );
+}
+
+.edgeFadeRight {
+  right: 0;
+  background: linear-gradient(
+    270deg,
+    rgb(255 255 255 / 88%) 0%,
+    rgb(255 255 255 / 0%) 100%
+  );
+}
+
+.edgeButton {
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #fff;
+  color: #323338;
+  box-shadow: 0 4px 16px rgb(20 18 60 / 16%);
+  transform: translateY(-50%);
+}
+
+.edgeButton:hover,
+.edgeButton:focus-visible {
+  background-color: #fff;
+  color: #323338;
+}
+
+.edgeButtonLeft {
+  left: 20px;
+}
+
+.edgeButtonRight {
+  right: 20px;
+}
+
+@media (hover: none) {
+  .edgeFade,
+  .edgeButton {
+    opacity: 1;
+  }
+
+  .edgeButton:not(.edgeHidden) {
+    pointer-events: auto;
+  }
+
+  .edgeHidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
 .carouselNav {
   position: relative;
   z-index: 2;
@@ -255,14 +358,8 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  gap: var(--space-8);
   margin-top: calc(-1 * var(--space-4));
   padding-bottom: var(--space-8);
-  pointer-events: auto;
-}
-
-.carouselButton {
-  pointer-events: auto;
 }
 
 .dots {
@@ -310,7 +407,7 @@
     padding-inline: 16px;
   }
 
-  .cardScroller {
+  .cardStrip {
     width: calc(100% + 32px);
     margin-inline: -16px;
   }
